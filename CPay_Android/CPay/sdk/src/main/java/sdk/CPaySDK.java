@@ -8,10 +8,12 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import com.alipay.sdk.app.PayTask;
 import java.util.List;
 import sdk.interfaces.InquireResponse;
 import sdk.interfaces.OrderResponse;
@@ -75,11 +77,11 @@ public class CPaySDK
     @SuppressWarnings("deprecation")
     public void gotOrder(CPayOrderResult orderResult)
     {
-        if(orderResult != null)
+        if (orderResult != null)
         {
             mOrderResult = orderResult;
 
-            if(orderResult.mRedirectUrl != null)
+            if (orderResult.mRedirectUrl != null)
             {
                 //wechat
                 final ViewGroup viewGroup = (ViewGroup) mActivity.findViewById(android.R.id.content);
@@ -99,13 +101,13 @@ public class CPaySDK
                             PackageManager packageManager = mActivity.getPackageManager();
                             List<ResolveInfo> activities = packageManager.queryIntentActivities(wechatIntent, 0);
                             boolean isIntentSafe = activities.size() > 0;
-                            if (isIntentSafe)
-                            {
+                            if (isIntentSafe) {
                                 mActivity.startActivity(wechatIntent);
                             }
 
                             Handler handler = new Handler();
-                            handler.postDelayed(new Runnable(){
+                            handler.postDelayed(new Runnable()
+                            {
                                 @Override
                                 public void run()
                                 {
@@ -136,6 +138,7 @@ public class CPaySDK
             else
             {
                 //alipay
+                payByAlipay();
             }
         }
         else
@@ -151,9 +154,75 @@ public class CPaySDK
 
     public void onResume()
     {
-        if(mOrderResult != null)
+        if (mOrderResult != null && mOrderResult.mRedirectUrl != null)
         {
             mOrderListener.gotOrderResult(mOrderResult);
         }
     }
+
+    private void payByAlipay()
+    {
+        final String orderInfo = mOrderResult.mOrderSpec + "&sign=" + mOrderResult.mSignedString + "&sign_type=RSA";
+
+        Runnable payRunnable = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                PayTask alipay = new PayTask(mActivity);
+                String result = alipay.pay(orderInfo, true);
+
+                Message msg = new Message();
+                msg.obj = result;
+                mHandler.sendMessage(msg);
+            }
+        };
+        Thread payThread = new Thread(payRunnable);
+        payThread.start();
+    }
+
+    private Handler mHandler = new Handler(new Handler.Callback()
+    {
+        @Override
+        public boolean handleMessage(Message msg)
+        {
+            if(msg.obj instanceof String)
+            {
+                try
+                {
+                    String result = (String) msg.obj;
+                    String[] kvp = result.split(";");
+                    for(String kv : kvp)
+                    {
+                        String[] entry = kv.split("=");
+                        String key = entry[0];
+                        if(key.equals("resultStatus"))
+                        {
+                            String value = entry[1].replace("{", "").replace("}", "");
+                            if(mOrderResult != null)
+                            {
+                                mOrderResult.mStatus = value;
+                            }
+                        }
+                        else if(key.equals("memo"))
+                        {
+                            String value = entry[1].replace("{", "").replace("}", "");
+                            if(mOrderResult != null)
+                            {
+                                mOrderResult.mMessage = value;
+                            }
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    ex.printStackTrace();
+                }
+
+                mOrderListener.gotOrderResult(mOrderResult);
+            }
+
+            return true;
+        }
+    });
 }

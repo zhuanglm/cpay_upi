@@ -57,6 +57,14 @@ public class APIManager
                             {
                                 result.mOrderId = response.getString("order_id");
                             }
+                            if(response.has("signed_string"))
+                            {
+                                result.mSignedString = response.getString("signed_string");
+                            }
+                            if(response.has("orderSpec"))
+                            {
+                                result.mOrderSpec = response.getString("orderSpec");
+                            }
                             result.mOrder = order;
                             CPaySDK.getInstance().gotOrder(result);
                         }

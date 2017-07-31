@@ -49,7 +49,7 @@ public class DemoActivity extends AppCompatActivity
         mBodyEditText.setText("我是测试数据");
         mAmountEditText.setText("2");
         mCurrencyEditText.setText("USD");
-        mVendorEditText.setText("wechatpay");
+        mVendorEditText.setText("alipay");
         mIpnEditText.setText("http://www.xxx.com");
         mCallbackEditText.setText("http://www.google.com");
 
@@ -70,18 +70,25 @@ public class DemoActivity extends AppCompatActivity
                 CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>()
                 {
                     @Override
-                    public void gotOrderResult(CPayOrderResult response)
+                    public void gotOrderResult(final CPayOrderResult orderResult)
                     {
-                        if(response != null)
+                        if(orderResult != null)
                         {
-                            CPaySDK.getInstance().inquireOrder(response, new InquireResponse<CPayInquireResult>()
+                            CPaySDK.getInstance().inquireOrder(orderResult, new InquireResponse<CPayInquireResult>()
                             {
                                 @Override
                                 public void gotInquireResult(CPayInquireResult response)
                                 {
                                     if(response != null)
                                     {
-                                        String emerging = "ORDER RESULT:\n\n";
+                                        String emerging = "";
+                                        if(orderResult.mStatus != null && orderResult.mMessage != null)
+                                        {
+                                            emerging += "ORDER RESULT:\n\n";
+                                            emerging += "STATUS: " + orderResult.mStatus + "\n";
+                                            emerging += "MESSAGE: " + orderResult.mMessage + "\n\n";
+                                        }
+                                        emerging += "CHECK RESULT:\n\n";
                                         if(response.mId != null)
                                         {
                                             emerging += "ORDER ID: " + response.mId + "\n";

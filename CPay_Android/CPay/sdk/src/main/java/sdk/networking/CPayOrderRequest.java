@@ -22,13 +22,6 @@ public class CPayOrderRequest extends Request<JSONObject>
     private Response.Listener<JSONObject> mListener;
     private Map<String, String> mParams;
 
-    public CPayOrderRequest(String url, Map<String, String> params,
-                            Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
-        super(Method.GET, url, errorListener);
-        this.mListener = reponseListener;
-        this.mParams = params;
-    }
-
     public CPayOrderRequest(int method, String url, Map<String, String> params,
                             Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
         super(method, url, errorListener);
