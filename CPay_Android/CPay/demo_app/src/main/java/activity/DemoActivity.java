@@ -24,7 +24,7 @@ public class DemoActivity extends AppCompatActivity
     private TextView mResultTextView;
     private ScrollView mScrollView;
 
-    private final String AUTH_TOKEN = "8BE127BDEEC749B182F02966618E3588";
+    private final String AUTH_TOKEN = "[MerchantToken]";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
