@@ -162,7 +162,7 @@ public class CPaySDK
 
     private void payByAlipay()
     {
-        final String orderInfo = mOrderResult.mOrderSpec + "&sign=" + mOrderResult.mSignedString + "&sign_type=RSA";
+        final String orderInfo = mOrderResult.mOrderSpec + "&sign=\"" + mOrderResult.mSignedString + "\"&sign_type=\"RSA\"";
 
         Runnable payRunnable = new Runnable()
         {
