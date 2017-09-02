@@ -10,9 +10,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ScrollView;
+
 import com.alipay.sdk.app.PayTask;
 import java.util.List;
 import sdk.interfaces.InquireResponse;
@@ -156,6 +159,8 @@ public class CPaySDK
     {
         if (mOrderResult != null && mOrderResult.mRedirectUrl != null)
         {
+            inquireOrderInternally();
+
             mOrderListener.gotOrderResult(mOrderResult);
         }
     }
@@ -219,10 +224,67 @@ public class CPaySDK
                     ex.printStackTrace();
                 }
 
+                inquireOrderInternally();
+
                 mOrderListener.gotOrderResult(mOrderResult);
             }
 
             return true;
         }
     });
+
+    private void inquireOrderInternally()
+    {
+        CPaySDK.getInstance().inquireOrder(mOrderResult, new InquireResponse<CPayInquireResult>()
+        {
+            @Override
+            public void gotInquireResult(CPayInquireResult response)
+            {
+                if(response != null)
+                {
+                    String emerging = "";
+                    emerging += "CHECK RESULT:\n\n";
+                    if(response.mId != null)
+                    {
+                        emerging += "ORDER ID: " + response.mId + "\n";
+                    }
+                    if(response.mType != null)
+                    {
+                        emerging += "TYPE: " + response.mType + "\n";
+                    }
+                    if(response.mAmount != null)
+                    {
+                        emerging += "AMOUNT: " + response.mAmount + "\n";
+                    }
+                    if(response.mTime != null)
+                    {
+                        emerging += "TIME: " + response.mTime + "\n";
+                    }
+                    if(response.mReference != null)
+                    {
+                        emerging += "REFERENCE: " + response.mReference + "\n";
+                    }
+                    if(response.mStatus != null)
+                    {
+                        emerging += "STATUS: " + response.mStatus + "\n";
+                    }
+                    if(response.mCurrency != null)
+                    {
+                        emerging += "CURRENCY: " + response.mCurrency + "\n";
+                    }
+                    if(response.mNote != null)
+                    {
+                        emerging += "NOTE: " + response.mNote + "\n";
+                    }
+
+                    Log.e("CPay", "inquiredOrder: " + emerging);
+                }
+
+                Intent intent = new Intent();
+                intent.setAction("CPAY_INQUIRE_ORDER");
+                intent.putExtra("inquire_result", response);
+                mActivity.sendBroadcast(intent);
+            }
+        });
+    }
 }
