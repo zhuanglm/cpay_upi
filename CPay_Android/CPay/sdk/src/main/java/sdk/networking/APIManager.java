@@ -94,7 +94,7 @@ public class APIManager
         int method = Request.Method.POST;
         Map<String, String> payload = new HashMap<>();
         payload.put("transaction_id", orderResult.mOrderId);
-        payload.put("method", "real");
+        payload.put("inquire_method", "real");
         CPayInquireRequest request = new CPayInquireRequest(method, url, payload,
                 new Response.Listener<JSONObject>()
                 {

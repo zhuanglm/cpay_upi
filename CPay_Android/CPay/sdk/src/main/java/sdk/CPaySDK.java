@@ -157,11 +157,12 @@ public class CPaySDK
 
     public void onResume()
     {
-        if (mOrderResult != null && mOrderResult.mRedirectUrl != null)
+        if (mOrderListener != null && mOrderResult != null && mOrderResult.mRedirectUrl != null)
         {
             inquireOrderInternally();
 
             mOrderListener.gotOrderResult(mOrderResult);
+            mOrderListener = null;
         }
     }
 
