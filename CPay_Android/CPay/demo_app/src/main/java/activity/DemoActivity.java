@@ -14,9 +14,11 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
+
+
 import citcon.cpay.R;
 import sdk.CPaySDK;
-import sdk.interfaces.InquireResponse;
+import sdk.PaymentActivity;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
@@ -31,7 +33,7 @@ public class DemoActivity extends AppCompatActivity
     private ScrollView mScrollView;
     private BroadcastReceiver mInquireReceiver;
 
-    private final String AUTH_TOKEN = "[MerchantToken]";
+    private final String AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -55,13 +57,13 @@ public class DemoActivity extends AppCompatActivity
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
-        mReferenceIdEditText.setText("1ZLLJULOCRW3LAU");
+        mReferenceIdEditText.setText("pay-mobile-test");
         mSubjectEditText.setText("测试");
         mBodyEditText.setText("我是测试数据");
         mAmountEditText.setText("1");
         mCurrencyEditText.setText("USD");
-        mVendorEditText.setText("alipay");
-        mIpnEditText.setText("http://www.xxx.com");
+        mVendorEditText.setText("wechatpay");
+        mIpnEditText.setText("https://uat.citconpay.com/payment/notify_wechatpay.php");
         mCallbackEditText.setText("http://www.google.com");
 
         Button requestButton = (Button) findViewById(R.id.request_button);
@@ -78,13 +80,14 @@ public class DemoActivity extends AppCompatActivity
                         mIpnEditText.getText().toString(),
                         mCallbackEditText.getText().toString(),
                         mSwitch.isChecked());
+
                 CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>()
                 {
                     @Override
                     public void gotOrderResult(final CPayOrderResult orderResult)
                     {
-                        if(orderResult != null)
-                        {
+                        if(orderResult != null){
+
                         }
                     }
                 });
@@ -150,7 +153,7 @@ public class DemoActivity extends AppCompatActivity
     {
         super.onResume();
 
-        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
+        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN, "wxeb0650d489d69e14").onResume();
 
         registerInquireReceiver();
     }

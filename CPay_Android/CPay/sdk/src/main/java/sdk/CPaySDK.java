@@ -3,162 +3,102 @@ package sdk;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ScrollView;
 
 import com.alipay.sdk.app.PayTask;
-import java.util.List;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import sdk.interfaces.InquireResponse;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
 import sdk.models.CPayOrderResult;
+import sdk.models.WXPayorder;
 import sdk.networking.APIManager;
 
 /**
  * Created by alexandrudiaconu on 7/20/17.
  */
 
-public class CPaySDK
-{
+public class CPaySDK {
     private static CPaySDK sInstance;
+    private final IWXAPI api;
     private APIManager mApiManager;
     private OrderResponse<CPayOrderResult> mOrderListener;
     private InquireResponse<CPayInquireResult> mInquireListener;
+
     public String mToken;
     private Activity mActivity;
     private CPayOrderResult mOrderResult;
+    public String mWXAppId;
 
-    private CPaySDK(Context context)
-    {
+    public HashMap<String, String> orderMap = new HashMap<String, String>();
+
+
+    private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
+        api = WXAPIFactory.createWXAPI(context, mWXAppId);
     }
 
-    public static synchronized CPaySDK getInstance(Activity activity, String token)
-    {
+
+    public static synchronized CPaySDK getInstance(Activity activity, String token, String wxAppId) {
         if (sInstance == null)
             sInstance = new CPaySDK(activity);
 
         sInstance.mActivity = activity;
         sInstance.mToken = token;
+        sInstance.mWXAppId = wxAppId;
 
         return sInstance;
     }
 
-    public static synchronized CPaySDK getInstance()
-    {
-        if (sInstance == null)
-        {
+    public static synchronized CPaySDK getInstance(Activity activity, String token) {
+        return getInstance(activity, token);
+    }
+
+
+    public static synchronized CPaySDK getInstance() {
+        if (sInstance == null) {
             throw new IllegalStateException(CPaySDK.class.getSimpleName() +
                     " is not initialized, call getInstance(...) first in the main Activity class");
         }
         return sInstance;
     }
 
-    public void requestOrder(CPayOrder order, final OrderResponse<CPayOrderResult> listener)
-    {
+    public void requestOrder(CPayOrder order, final OrderResponse<CPayOrderResult> listener) {
         mOrderListener = listener;
         mApiManager.requestOrder(order);
     }
 
-    public void inquireOrder(CPayOrderResult orderResult, final InquireResponse<CPayInquireResult> listener)
-    {
+    public void inquireOrder(CPayOrderResult orderResult, final InquireResponse<CPayInquireResult> listener) {
         mInquireListener = listener;
         mApiManager.inquireOrder(orderResult);
     }
 
+
     @SuppressWarnings("deprecation")
-    public void gotOrder(CPayOrderResult orderResult)
-    {
-        if (orderResult != null)
-        {
+    public void gotOrder(CPayOrderResult orderResult) {
+        if (orderResult != null) {
             mOrderResult = orderResult;
-
-            if (orderResult.mRedirectUrl != null)
-            {
-                //wechat
-                final ViewGroup viewGroup = (ViewGroup) mActivity.findViewById(android.R.id.content);
-                final WebView webView = new WebView(mActivity);
-                webView.getSettings().setJavaScriptEnabled(true);
-                webView.getSettings().setLoadsImagesAutomatically(true);
-                webView.setBackgroundColor(ContextCompat.getColor(mActivity, android.R.color.darker_gray));
-                webView.setWebViewClient(new WebViewClient()
-                {
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, String url)
-                    {
-                        if (url.startsWith("weixin://"))
-                        {
-                            Uri wechatUri = Uri.parse(url);
-                            Intent wechatIntent = new Intent(Intent.ACTION_VIEW, wechatUri);
-                            PackageManager packageManager = mActivity.getPackageManager();
-                            List<ResolveInfo> activities = packageManager.queryIntentActivities(wechatIntent, 0);
-                            boolean isIntentSafe = activities.size() > 0;
-                            if (isIntentSafe) {
-                                mActivity.startActivity(wechatIntent);
-                            }
-
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    viewGroup.removeView(webView);
-                                }
-                            }, 5000);
-
-                            return true;
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public void onLoadResource(WebView view, String url)
-                    {
-                        super.onLoadResource(view, url);
-                    }
-
-                    @Override
-                    public void onPageStarted(WebView view, String url, Bitmap favicon)
-                    {
-                        super.onPageStarted(view, url, favicon);
-                    }
-                });
-                viewGroup.addView(webView, 1);
-                webView.loadUrl(orderResult.mRedirectUrl);
-            }
-            else
-            {
-                //alipay
-                payByAlipay();
-            }
-        }
-        else
-        {
+            payByAlipay();
+        } else {
             mOrderListener.gotOrderResult(null);
         }
     }
 
-    public void inquiredOrder(CPayInquireResult inquireResult)
-    {
+    public void inquiredOrder(CPayInquireResult inquireResult) {
         mInquireListener.gotInquireResult(inquireResult);
     }
 
-    public void onResume()
-    {
-        if (mOrderListener != null && mOrderResult != null && mOrderResult.mRedirectUrl != null)
-        {
+    public void onResume() {
+        if (mOrderListener != null && mOrderResult != null && mOrderResult.mRedirectUrl != null) {
             inquireOrderInternally();
 
             mOrderListener.gotOrderResult(mOrderResult);
@@ -166,15 +106,12 @@ public class CPaySDK
         }
     }
 
-    private void payByAlipay()
-    {
+    private void payByAlipay() {
         final String orderInfo = mOrderResult.mOrderSpec + "&sign=\"" + mOrderResult.mSignedString + "\"&sign_type=\"RSA\"";
 
-        Runnable payRunnable = new Runnable()
-        {
+        Runnable payRunnable = new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 PayTask alipay = new PayTask(mActivity);
                 String result = alipay.pay(orderInfo, true);
 
@@ -187,41 +124,29 @@ public class CPaySDK
         payThread.start();
     }
 
-    private Handler mHandler = new Handler(new Handler.Callback()
-    {
+    private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
-        public boolean handleMessage(Message msg)
-        {
-            if(msg.obj instanceof String)
-            {
-                try
-                {
+        public boolean handleMessage(Message msg) {
+            if (msg.obj instanceof String) {
+                try {
                     String result = (String) msg.obj;
                     String[] kvp = result.split(";");
-                    for(String kv : kvp)
-                    {
+                    for (String kv : kvp) {
                         String[] entry = kv.split("=");
                         String key = entry[0];
-                        if(key.equals("resultStatus"))
-                        {
+                        if (key.equals("resultStatus")) {
                             String value = entry[1].replace("{", "").replace("}", "");
-                            if(mOrderResult != null)
-                            {
+                            if (mOrderResult != null) {
                                 mOrderResult.mStatus = value;
                             }
-                        }
-                        else if(key.equals("memo"))
-                        {
+                        } else if (key.equals("memo")) {
                             String value = entry[1].replace("{", "").replace("}", "");
-                            if(mOrderResult != null)
-                            {
+                            if (mOrderResult != null) {
                                 mOrderResult.mMessage = value;
                             }
                         }
                     }
-                }
-                catch(Exception ex)
-                {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
@@ -234,47 +159,36 @@ public class CPaySDK
         }
     });
 
-    private void inquireOrderInternally()
-    {
-        CPaySDK.getInstance().inquireOrder(mOrderResult, new InquireResponse<CPayInquireResult>()
-        {
+
+    private void inquireOrderInternally() {
+        CPaySDK.getInstance().inquireOrder(mOrderResult, new InquireResponse<CPayInquireResult>() {
             @Override
-            public void gotInquireResult(CPayInquireResult response)
-            {
-                if(response != null)
-                {
+            public void gotInquireResult(CPayInquireResult response) {
+                if (response != null) {
                     String emerging = "";
                     emerging += "CHECK RESULT:\n\n";
-                    if(response.mId != null)
-                    {
+                    if (response.mId != null) {
                         emerging += "ORDER ID: " + response.mId + "\n";
                     }
-                    if(response.mType != null)
-                    {
+                    if (response.mType != null) {
                         emerging += "TYPE: " + response.mType + "\n";
                     }
-                    if(response.mAmount != null)
-                    {
+                    if (response.mAmount != null) {
                         emerging += "AMOUNT: " + response.mAmount + "\n";
                     }
-                    if(response.mTime != null)
-                    {
+                    if (response.mTime != null) {
                         emerging += "TIME: " + response.mTime + "\n";
                     }
-                    if(response.mReference != null)
-                    {
+                    if (response.mReference != null) {
                         emerging += "REFERENCE: " + response.mReference + "\n";
                     }
-                    if(response.mStatus != null)
-                    {
+                    if (response.mStatus != null) {
                         emerging += "STATUS: " + response.mStatus + "\n";
                     }
-                    if(response.mCurrency != null)
-                    {
+                    if (response.mCurrency != null) {
                         emerging += "CURRENCY: " + response.mCurrency + "\n";
                     }
-                    if(response.mNote != null)
-                    {
+                    if (response.mNote != null) {
                         emerging += "NOTE: " + response.mNote + "\n";
                     }
 
@@ -288,4 +202,35 @@ public class CPaySDK
             }
         });
     }
+
+    public void gotWX(WXPayorder result) {
+        if (result != null) {
+            mOrderResult = new CPayOrderResult();
+            mOrderResult.mOrder = new CPayOrder();
+            mOrderResult.mOrderId = result.extData;
+            mOrderResult.mOrder.setmVendor("wechatpay");
+
+            PayReq req = new PayReq();
+            req.appId = result.appid;
+            req.partnerId = result.partnerid;
+            req.prepayId = result.prepayid;
+            req.nonceStr = result.noncestr;
+            req.timeStamp = result.timestamp;
+            req.packageValue = result.mPackage;
+            req.sign = result.sign;
+            req.extData = result.extData;
+            api.sendReq(req);
+        } else {
+            mOrderListener.gotOrderResult(null);
+
+        }
+
+    }
+
+    public void onWXPaySuccess(String orderId) {
+        if(orderId.equals(mOrderResult.mOrderId)){
+            inquireOrderInternally();
+        }
+    }
+
 }

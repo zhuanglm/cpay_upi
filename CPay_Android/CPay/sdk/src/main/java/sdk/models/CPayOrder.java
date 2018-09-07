@@ -1,7 +1,5 @@
 package sdk.models;
 
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +18,18 @@ public class CPayOrder
     private String mIpnUrl;
     private String mCallbackUrl;
     private boolean mAllowDuplicate;
+
+    public String getmVendor() {
+        return mVendor;
+    }
+
+    public void setmVendor(String mVendor){
+        this.mVendor = mVendor;
+    }
+
+    public CPayOrder(){
+
+    }
 
     public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
                      boolean allowDuplicate)

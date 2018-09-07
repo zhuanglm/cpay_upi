@@ -13,6 +13,7 @@ import sdk.CPaySDK;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
 import sdk.models.CPayOrderResult;
+import sdk.models.WXPayorder;
 
 /**
  * Created by alexandrudiaconu on 7/20/17.
@@ -46,32 +47,54 @@ public class APIManager
                     @Override
                     public void onResponse(JSONObject response)
                     {
-                        try
-                        {
-                            CPayOrderResult result = new CPayOrderResult();
-                            if(response.has("redirect_url"))
+                        if(order.getmVendor().equals("wechatpay")){
+                            try
                             {
-                                result.mRedirectUrl = response.getString("redirect_url");
+                                WXPayorder result = new WXPayorder();
+                                result.appid = response.optString("appid");
+                                result.partnerid = response.optString("partnerid");
+                                result.mPackage = response.optString("package");
+                                result.noncestr = response.optString("noncestr");
+                                result.timestamp = response.optString("timestamp");
+                                result.prepayid = response.optString("prepayid");
+                                result.sign = response.optString("sign");
+                                result.extData = response.optString("order_id");
+                                CPaySDK.getInstance().gotWX(result);
                             }
-                            if(response.has("order_id"))
+                            catch(Exception ex)
                             {
-                                result.mOrderId = response.getString("order_id");
+                                ex.printStackTrace();
+                                CPaySDK.getInstance().gotWX(null);
                             }
-                            if(response.has("signed_string"))
+
+                        }else if(order.getmVendor().equals("alipay")){
+                            try
                             {
-                                result.mSignedString = response.getString("signed_string");
+                                CPayOrderResult result = new CPayOrderResult();
+                                if(response.has("redirect_url"))
+                                {
+                                    result.mRedirectUrl = response.getString("redirect_url");
+                                }
+                                if(response.has("order_id"))
+                                {
+                                    result.mOrderId = response.getString("order_id");
+                                }
+                                if(response.has("signed_string"))
+                                {
+                                    result.mSignedString = response.getString("signed_string");
+                                }
+                                if(response.has("orderSpec"))
+                                {
+                                    result.mOrderSpec = response.getString("orderSpec");
+                                }
+                                result.mOrder = order;
+                                CPaySDK.getInstance().gotOrder(result);
                             }
-                            if(response.has("orderSpec"))
+                            catch(Exception ex)
                             {
-                                result.mOrderSpec = response.getString("orderSpec");
+                                ex.printStackTrace();
+                                CPaySDK.getInstance().gotOrder(null);
                             }
-                            result.mOrder = order;
-                            CPaySDK.getInstance().gotOrder(result);
-                        }
-                        catch(Exception ex)
-                        {
-                            ex.printStackTrace();
-                            CPaySDK.getInstance().gotOrder(null);
                         }
                     }
                 },
@@ -90,7 +113,13 @@ public class APIManager
 
     public void inquireOrder(final CPayOrderResult orderResult)
     {
-        String url = Environment.URL_INQUIRE;
+        String url;
+        if(orderResult.mOrder.getmVendor().equals("wechatpay")){
+            url = Environment.URL_INQUIRE_WX;
+        }else {
+            url = Environment.URL_INQUIRE;
+        }
+
         int method = Request.Method.POST;
         Map<String, String> payload = new HashMap<>();
         payload.put("transaction_id", orderResult.mOrderId);
