@@ -5,9 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,10 +15,8 @@ import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-
 import citcon.cpay.R;
 import sdk.CPaySDK;
-import sdk.PaymentActivity;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
@@ -31,9 +29,14 @@ public class DemoActivity extends AppCompatActivity
     private Switch mSwitch;
     private TextView mResultTextView;
     private ScrollView mScrollView;
+
+    // After Pay success query transaction result
+
     private BroadcastReceiver mInquireReceiver;
 
+
     private final String AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+    private final String WXAPP_ID = "wxeb0650d489d69e14";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -57,14 +60,14 @@ public class DemoActivity extends AppCompatActivity
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
-        mReferenceIdEditText.setText("pay-mobile-test");
-        mSubjectEditText.setText("测试");
-        mBodyEditText.setText("我是测试数据");
-        mAmountEditText.setText("1");
-        mCurrencyEditText.setText("USD");
-        mVendorEditText.setText("wechatpay");
-        mIpnEditText.setText("https://uat.citconpay.com/payment/notify_wechatpay.php");
-        mCallbackEditText.setText("http://www.google.com");
+        mReferenceIdEditText.setText("pay-mobile-test"); //Citcon Referance ID
+        mSubjectEditText.setText("Test"); // order subject
+        mBodyEditText.setText("Test data"); // order body
+        mAmountEditText.setText("1"); // amount
+        mCurrencyEditText.setText("USD"); // currency USD
+        mVendorEditText.setText("wechatpay"); // payment vendor wechatpay or alipay
+        mIpnEditText.setText("https://uat.citconpay.com/payment/notify_wechatpay.php"); //citcon payment callback url
+        mCallbackEditText.setText("http://www.google.com"); // custom callback url to customization processing
 
         Button requestButton = (Button) findViewById(R.id.request_button);
         requestButton.setOnClickListener(new View.OnClickListener() {
@@ -94,6 +97,11 @@ public class DemoActivity extends AppCompatActivity
             }
         });
 
+        /**
+         *
+         * <p>Get payment success broadcasting CPayInquireResult
+         *
+         */
         mInquireReceiver = new BroadcastReceiver()
         {
             @Override
@@ -148,15 +156,30 @@ public class DemoActivity extends AppCompatActivity
         };
     }
 
+    /**
+     *
+     * <p>Init CPaySDK with AUTH_TOKEN, WXAPP_ID. Register BroadcastReceiver of payment success
+     * AUTH_TOKEN author token apply from Citcon.
+     * WXAPP_ID wechat appid from Wechat
+     *
+     */
+
+
     @Override
     public void onResume()
     {
         super.onResume();
 
-        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN, "wxeb0650d489d69e14").onResume();
+        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN, WXAPP_ID).onResume();
 
         registerInquireReceiver();
     }
+
+    /**
+     *
+     * <p>onPause to unregister BroadcastReceiver.
+     *
+     */
 
     @Override
     public void onPause()
@@ -166,6 +189,11 @@ public class DemoActivity extends AppCompatActivity
         unregisterInquireReceiver();
     }
 
+    /**
+     *
+     * Register BroadcastReceiver.
+     *
+     */
     private void registerInquireReceiver()
     {
         if(mInquireReceiver != null)
@@ -176,6 +204,11 @@ public class DemoActivity extends AppCompatActivity
         }
     }
 
+    /**
+     *
+     * <p>unregister BroadcastReceiver.
+     *
+     */
     private void unregisterInquireReceiver()
     {
         if(mInquireReceiver != null)
