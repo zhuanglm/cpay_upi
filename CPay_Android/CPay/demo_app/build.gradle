@@ -39,9 +39,16 @@ android {
     }
 }
 
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':sdk')
+//        implementation(name: 'citcon-sdk', ext: 'aar')
+        implementation project(':sdk')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })

@@ -42,9 +42,46 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:5.1.6'
-
     implementation 'com.android.support:appcompat-v7:27.1.1'
     testImplementation 'junit:junit:4.12'
     implementation 'com.android.support:multidex:1.0.3'
 }
+
+def jarName = 'citcon-sdk.jar'
+
+
+task clearJar(type: Delete) {
+    delete "${project.buildDir}/libs/" + jarName
+    delete "${project.buildDir}/libs/alipaySdk-20180403.jar"
+    delete "${project.buildDir}/libs/volley.jar"
+    delete "${project.buildDir}/libs/wechat-sdk-android-without-mta-5.1.6.jar"
+}
+
+task makeJar(type: Copy) {
+    from("${project.buildDir}/intermediates/packaged-classes/release/")
+    into("${project.buildDir}/libs/")
+    include('classes.jar')
+    rename('classes.jar', jarName)
+
+    from("${project.buildDir}/intermediates/packaged-classes/release/libs/")
+    into("${project.buildDir}/libs/")
+    include('alipaySdk-20180403.jar')
+    include('volley.jar')
+    include('wechat-sdk-android-without-mta-5.1.6.jar')
+
+}
+
+task superSimpleJar(type: Jar) {
+    baseName = project.name + '-all'
+    from {
+        configurations.compile.findAll {
+            it.getName() != 'android.jar'
+        }.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+makeJar.dependsOn(clearJar, build)
+
+

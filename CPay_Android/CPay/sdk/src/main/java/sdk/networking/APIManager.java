@@ -59,6 +59,7 @@ public class APIManager
                                 result.prepayid = response.optString("prepayid");
                                 result.sign = response.optString("sign");
                                 result.extData = response.optString("order_id");
+                                CPaySDK.setWXAppId(result.appid);
                                 CPaySDK.getInstance().gotWX(result);
                             }
                             catch(Exception ex)

@@ -39,8 +39,6 @@ public class CPaySDK {
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
 
-    public HashMap<String, String> orderMap = new HashMap<String, String>();
-
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
@@ -48,19 +46,21 @@ public class CPaySDK {
     }
 
 
-    public static synchronized CPaySDK getInstance(Activity activity, String token, String wxAppId) {
+    public static void setWXAppId(String wxAppId){
+        sInstance.mWXAppId = wxAppId;
+    }
+
+    public static String getWXAppId(){
+        return sInstance.mWXAppId;
+    }
+
+    public static synchronized CPaySDK getInstance(Activity activity, String token) {
         if (sInstance == null)
             sInstance = new CPaySDK(activity);
 
         sInstance.mActivity = activity;
         sInstance.mToken = token;
-        sInstance.mWXAppId = wxAppId;
-
         return sInstance;
-    }
-
-    public static synchronized CPaySDK getInstance(Activity activity, String token) {
-        return getInstance(activity, token);
     }
 
 

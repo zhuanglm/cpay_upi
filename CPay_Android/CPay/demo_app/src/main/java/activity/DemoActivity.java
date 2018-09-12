@@ -5,9 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,10 +15,8 @@ import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-
 import citcon.cpay.R;
 import sdk.CPaySDK;
-import sdk.PaymentActivity;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
@@ -153,7 +151,7 @@ public class DemoActivity extends AppCompatActivity
     {
         super.onResume();
 
-        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN, "wxeb0650d489d69e14").onResume();
+        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
 
         registerInquireReceiver();
     }
