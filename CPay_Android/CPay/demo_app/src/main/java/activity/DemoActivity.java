@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import citcon.cpay.R;
 import sdk.CPaySDK;
@@ -22,8 +23,7 @@ import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
 import sdk.models.CPayOrderResult;
 
-public class DemoActivity extends AppCompatActivity
-{
+public class DemoActivity extends AppCompatActivity {
     private EditText mReferenceIdEditText, mSubjectEditText, mBodyEditText, mAmountEditText,
             mCurrencyEditText, mVendorEditText, mIpnEditText, mCallbackEditText;
     private Switch mSwitch;
@@ -34,17 +34,26 @@ public class DemoActivity extends AppCompatActivity
 
     private BroadcastReceiver mInquireReceiver;
 
+    private static boolean IS_CN = true;
 
+
+    private final String REF_ID = "pay-mobile-test";
     private final String AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+    private final String CALLBACK_URL = "https://uat.citconpay.com/payment/notify_wechatpay.php";
+
+
+    private final String REF_ID_CN = "CNY-mobile-test";
+    private final String AUTH_TOKEN_CN = "CNYAPPF6A0FE479A891BF45706A690AE";
+    private final String CALLBACK_URL_CN = "http://52.87.248.227/ipn.php";
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
 
         ActivityCompat.requestPermissions(this,
-                new String[]{ Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 1);
 
         mReferenceIdEditText = (EditText) findViewById(R.id.reference_id_editText);
@@ -59,20 +68,19 @@ public class DemoActivity extends AppCompatActivity
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
-        mReferenceIdEditText.setText("pay-mobile-test"); //Citcon Referance ID
+        mReferenceIdEditText.setText(IS_CN ? REF_ID_CN : REF_ID); //Citcon Referance ID
         mSubjectEditText.setText("Test"); // order subject
         mBodyEditText.setText("Test data"); // order body
         mAmountEditText.setText("1"); // amount
-        mCurrencyEditText.setText("USD"); // currency USD
+        mCurrencyEditText.setText(IS_CN? "CNY": "USD"); // currency USD
         mVendorEditText.setText("wechatpay"); // payment vendor wechatpay or alipay
-        mIpnEditText.setText("https://uat.citconpay.com/payment/notify_wechatpay.php"); //citcon payment callback url
+        mIpnEditText.setText(IS_CN ? CALLBACK_URL_CN : CALLBACK_URL); //citcon payment callback url
         mCallbackEditText.setText("http://www.google.com"); // custom callback url to customization processing
 
         Button requestButton = (Button) findViewById(R.id.request_button);
         requestButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
                         mSubjectEditText.getText().toString(),
                         mBodyEditText.getText().toString(),
@@ -83,12 +91,10 @@ public class DemoActivity extends AppCompatActivity
                         mCallbackEditText.getText().toString(),
                         mSwitch.isChecked());
 
-                CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>()
-                {
+                CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>() {
                     @Override
-                    public void gotOrderResult(final CPayOrderResult orderResult)
-                    {
-                        if(orderResult != null){
+                    public void gotOrderResult(final CPayOrderResult orderResult) {
+                        if (orderResult != null) {
 
                         }
                     }
@@ -101,53 +107,42 @@ public class DemoActivity extends AppCompatActivity
          * <p>Get payment success broadcasting CPayInquireResult
          *
          */
-        mInquireReceiver = new BroadcastReceiver()
-        {
+        mInquireReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 CPayInquireResult response = (CPayInquireResult) intent.getSerializableExtra("inquire_result");
                 String emerging = "";
                 emerging += "CHECK RESULT:\n\n";
-                if(response.mId != null)
-                {
+                if (response.mId != null) {
                     emerging += "ORDER ID: " + response.mId + "\n";
                 }
-                if(response.mType != null)
-                {
+                if (response.mType != null) {
                     emerging += "TYPE: " + response.mType + "\n";
                 }
-                if(response.mAmount != null)
-                {
+                if (response.mAmount != null) {
                     emerging += "AMOUNT: " + response.mAmount + "\n";
                 }
-                if(response.mTime != null)
-                {
+                if (response.mTime != null) {
                     emerging += "TIME: " + response.mTime + "\n";
                 }
-                if(response.mReference != null)
-                {
+                if (response.mReference != null) {
                     emerging += "REFERENCE: " + response.mReference + "\n";
                 }
-                if(response.mStatus != null)
-                {
+                if (response.mStatus != null) {
                     emerging += "STATUS: " + response.mStatus + "\n";
                 }
-                if(response.mCurrency != null)
-                {
+                if (response.mCurrency != null) {
                     emerging += "CURRENCY: " + response.mCurrency + "\n";
                 }
-                if(response.mNote != null)
-                {
+                if (response.mNote != null) {
                     emerging += "NOTE: " + response.mNote + "\n";
                 }
 
                 mResultTextView.setText(emerging);
 
-                mScrollView.post(new Runnable()
-                {
+                mScrollView.post(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
                     }
                 });
@@ -156,45 +151,35 @@ public class DemoActivity extends AppCompatActivity
     }
 
     /**
-     *
      * <p>Init CPaySDK with AUTH_TOKEN, WXAPP_ID. Register BroadcastReceiver of payment success
      * AUTH_TOKEN author token apply from Citcon.
      * WXAPP_ID wechat appid from Wechat
-     *
      */
 
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
-        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
+        CPaySDK.getInstance(DemoActivity.this, IS_CN ? AUTH_TOKEN_CN : AUTH_TOKEN).onResume();
         registerInquireReceiver();
     }
 
     /**
-     *
      * <p>onPause to unregister BroadcastReceiver.
-     *
      */
 
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         super.onPause();
 
         unregisterInquireReceiver();
     }
 
     /**
-     *
      * Register BroadcastReceiver.
-     *
      */
-    private void registerInquireReceiver()
-    {
-        if(mInquireReceiver != null)
-        {
+    private void registerInquireReceiver() {
+        if (mInquireReceiver != null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction("CPAY_INQUIRE_ORDER");
             registerReceiver(mInquireReceiver, filter);
@@ -202,13 +187,10 @@ public class DemoActivity extends AppCompatActivity
     }
 
     /**
-     *
      * <p>unregister BroadcastReceiver.
-     *
      */
-    private void unregisterInquireReceiver()
-    {
-        if(mInquireReceiver != null)
+    private void unregisterInquireReceiver() {
+        if (mInquireReceiver != null)
             unregisterReceiver(mInquireReceiver);
     }
 }

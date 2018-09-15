@@ -39,7 +39,14 @@ public class APIManager
 
     public void requestOrder(final CPayOrder order)
     {
-        String url = Environment.URL_PAY;
+        String url;
+
+        if(CPaySDK.getInstance().mToken.startsWith("CNY")){
+            url = Environment.URL_PAY_CN;
+        }else {
+            url = Environment.URL_PAY;
+        }
+
         int method = Request.Method.POST;
         CPayOrderRequest request = new CPayOrderRequest(method, url, order.toPayload(),
                 new Response.Listener<JSONObject>()
@@ -115,10 +122,15 @@ public class APIManager
     public void inquireOrder(final CPayOrderResult orderResult)
     {
         String url;
-        if(orderResult.mOrder.getmVendor().equals("wechatpay")){
-            url = Environment.URL_INQUIRE_WX;
+
+        if(CPaySDK.getInstance().mToken.startsWith("CNY")){
+            url = Environment.URL_INQUIRE_WX_CN;
         }else {
-            url = Environment.URL_INQUIRE;
+            if(orderResult.mOrder.getmVendor().equals("wechatpay")){
+                url = Environment.URL_INQUIRE_WX;
+            }else {
+                url = Environment.URL_INQUIRE;
+            }
         }
 
         int method = Request.Method.POST;
