@@ -38,7 +38,8 @@ public class CPaySDK {
     private Activity mActivity;
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
-
+    private String env;
+    private boolean isRMB;
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
@@ -54,12 +55,27 @@ public class CPaySDK {
         return sInstance.mWXAppId;
     }
 
-    public static synchronized CPaySDK getInstance(Activity activity, String token) {
+    public static void setEnv(String env){
+        sInstance.env = env;
+    }
+
+    public static String getEnv(){
+        return sInstance == null ? "dev": sInstance.env;
+    }
+
+    public static boolean getIsRMB(){
+        return sInstance != null && sInstance.isRMB;
+
+    }
+
+    public static synchronized CPaySDK getInstance(Activity activity, String token, boolean isRMB, String env) {
         if (sInstance == null)
             sInstance = new CPaySDK(activity);
 
         sInstance.mActivity = activity;
         sInstance.mToken = token;
+        sInstance.env = env;
+        sInstance.isRMB = isRMB;
         return sInstance;
     }
 
@@ -219,7 +235,11 @@ public class CPaySDK {
             req.packageValue = result.mPackage;
             req.sign = result.sign;
             req.extData = result.extData;
-            api.sendReq(req);
+
+            Log.d("jim","check args "+ req.checkArgs());
+            Log.d("jim","send return :"+ api.sendReq(req));
+
+
         } else {
             mOrderListener.gotOrderResult(null);
 

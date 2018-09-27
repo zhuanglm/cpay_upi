@@ -23,6 +23,8 @@ public class APIManager
 {
     private static APIManager sInstance;
     private RequestQueue mGlobalRequestQueue;
+    private String BASE_URL;
+
 
     public static APIManager getInstance(Context context)
     {
@@ -37,15 +39,34 @@ public class APIManager
         mGlobalRequestQueue = Volley.newRequestQueue(context);
     }
 
+
+    private String getBaseURL(){
+        if(BASE_URL == null){
+            String env = CPaySDK.getEnv();
+            boolean isRMB = CPaySDK.getIsRMB();
+            if(env.equals("uat")){
+                BASE_URL = isRMB ? Environment.URL_RMB_UAT: Environment.URL_USD_UAT;
+            }else if(env.equals("pro")){
+                BASE_URL = isRMB ? Environment.URL_RMB_PRO: Environment.URL_USD_PRO;
+            }else {
+                // dev
+                BASE_URL = isRMB ? Environment.URL_RMB_DEV: Environment.URL_USD_DEV;
+            }
+        }
+        return BASE_URL;
+    }
+
+    private String getRequestOrderURL(){
+        return getBaseURL() + "payment/pay_app";
+    }
+
+    private String getQueryResultURL(){
+        return getBaseURL() + "payment/inquire";
+    }
+
     public void requestOrder(final CPayOrder order)
     {
-        String url;
-
-        if(CPaySDK.getInstance().mToken.startsWith("CNY")){
-            url = Environment.URL_PAY_CN;
-        }else {
-            url = Environment.URL_PAY;
-        }
+        String url = getRequestOrderURL();
 
         int method = Request.Method.POST;
         CPayOrderRequest request = new CPayOrderRequest(method, url, order.toPayload(),
@@ -121,18 +142,7 @@ public class APIManager
 
     public void inquireOrder(final CPayOrderResult orderResult)
     {
-        String url;
-
-        if(CPaySDK.getInstance().mToken.startsWith("CNY")){
-            url = Environment.URL_INQUIRE_WX_CN;
-        }else {
-            if(orderResult.mOrder.getmVendor().equals("wechatpay")){
-                url = Environment.URL_INQUIRE_WX;
-            }else {
-                url = Environment.URL_INQUIRE;
-            }
-        }
-
+        String url = getQueryResultURL();
         int method = Request.Method.POST;
         Map<String, String> payload = new HashMap<>();
         payload.put("transaction_id", orderResult.mOrderId);

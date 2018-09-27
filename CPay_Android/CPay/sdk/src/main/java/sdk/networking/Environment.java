@@ -7,15 +7,15 @@ package sdk.networking;
 public abstract class Environment
 {
 
+    // NON-RMB
+    public static final String URL_USD_DEV = "https://dev.citconpay.com/";
+    public static final String URL_USD_UAT = "https://uat.citconpay.com/";
+    public static final String URL_USD_PRO = "https://citconpay.com/";
 
-    private static final String URL_ROOT = "https://uat.citconpay.com/";
-//    public static final String URL_PAY = URL_ROOT + "payment/pay_mobile2";
+    // RMB
+    public static final String URL_RMB_DEV = "https://cny-dev.citcon-mkt.com/";
+    public static final String URL_RMB_UAT = "https://cny-uat.citconpay.com/";
+    public static final String URL_RMB_PRO = "https://cny.citcon-mkt.com/";
 
-    public static final String URL_PAY = "http://uat.citconpay.com/payment/pay_app";
-    public static final String URL_INQUIRE = URL_ROOT + "payment/inquire.php";
-    public static final String URL_INQUIRE_WX = URL_ROOT + "payment/inquire";
-
-    public static final String URL_PAY_CN = "http://cny.citcon-mkt.com/payment/pay_app";
-    public static final String URL_INQUIRE_WX_CN = "http://cny.citcon-mkt.com/payment/inquire";
 
 }

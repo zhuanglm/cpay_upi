@@ -37,6 +37,7 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
 
     @Override
     public void onReq(BaseReq req) {
+        Log.e(TAG, req.toString());
     }
 
     @Override

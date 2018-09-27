@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import citcon.cpay.R;
 import sdk.CPaySDK;
@@ -34,8 +34,8 @@ public class DemoActivity extends AppCompatActivity {
 
     private BroadcastReceiver mInquireReceiver;
 
-    private static boolean IS_CN = true;
-
+    private static boolean IS_RMB = true;
+    private static String ENV = "pro";
 
     private final String REF_ID = "pay-mobile-test";
     private final String AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
@@ -68,13 +68,13 @@ public class DemoActivity extends AppCompatActivity {
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
-        mReferenceIdEditText.setText(IS_CN ? REF_ID_CN : REF_ID); //Citcon Referance ID
+        mReferenceIdEditText.setText(IS_RMB ? REF_ID_CN : REF_ID); //Citcon Referance ID
         mSubjectEditText.setText("Test"); // order subject
         mBodyEditText.setText("Test data"); // order body
         mAmountEditText.setText("1"); // amount
-        mCurrencyEditText.setText(IS_CN? "CNY": "USD"); // currency USD
+        mCurrencyEditText.setText(IS_RMB ? "CNY": "USD"); // currency USD
         mVendorEditText.setText("wechatpay"); // payment vendor wechatpay or alipay
-        mIpnEditText.setText(IS_CN ? CALLBACK_URL_CN : CALLBACK_URL); //citcon payment callback url
+        mIpnEditText.setText(IS_RMB ? CALLBACK_URL_CN : CALLBACK_URL); //citcon payment callback url
         mCallbackEditText.setText("http://www.google.com"); // custom callback url to customization processing
 
         Button requestButton = (Button) findViewById(R.id.request_button);
@@ -154,13 +154,14 @@ public class DemoActivity extends AppCompatActivity {
      * <p>Init CPaySDK with AUTH_TOKEN, WXAPP_ID. Register BroadcastReceiver of payment success
      * AUTH_TOKEN author token apply from Citcon.
      * WXAPP_ID wechat appid from Wechat
+     * ENV environment String  uat cny dev
      */
 
 
     @Override
     public void onResume() {
         super.onResume();
-        CPaySDK.getInstance(DemoActivity.this, IS_CN ? AUTH_TOKEN_CN : AUTH_TOKEN).onResume();
+        CPaySDK.getInstance(DemoActivity.this, IS_RMB ? AUTH_TOKEN_CN : AUTH_TOKEN, IS_RMB, ENV).onResume();
         registerInquireReceiver();
     }
 

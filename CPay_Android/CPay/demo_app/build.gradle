@@ -1,10 +1,13 @@
 apply plugin: 'com.android.application'
 
+//USD - citcon.cpay
+//RMB - com.cpay.cpaydemo
+
 android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
     defaultConfig {
-        applicationId "citcon.cpay"
+        applicationId "com.cpay.cpaydemo"
         minSdkVersion 15
         targetSdkVersion 27
         versionCode 1
