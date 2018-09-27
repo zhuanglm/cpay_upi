@@ -34,8 +34,8 @@ public class DemoActivity extends AppCompatActivity {
 
     private BroadcastReceiver mInquireReceiver;
 
-    private static boolean IS_RMB = true;
-    private static String ENV = "pro";
+    private static boolean IS_RMB = false;
+    private static String ENV = "dev";
 
     private final String REF_ID = "pay-mobile-test";
     private final String AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
