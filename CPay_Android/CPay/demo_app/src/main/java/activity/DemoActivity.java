@@ -17,7 +17,9 @@ import android.widget.TextView;
 
 
 import citcon.cpay.R;
+import sdk.AnnotationCurrency;
 import sdk.CPaySDK;
+import sdk.Currency;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
@@ -33,24 +35,30 @@ public class DemoActivity extends AppCompatActivity {
     // After Pay success query transaction result
 
     private BroadcastReceiver mInquireReceiver;
+    private static String CURRENCY = sdk.Currency.USD;
+    private static String ENV = sdk.Env.PROD;
 
-    private static boolean IS_RMB = false;
-    private static String ENV = "dev";
+    private String REF_ID;
+    private String AUTH_TOKEN;
+    private String CALLBACK_URL;
 
-    private final String REF_ID = "pay-mobile-test";
-    private final String AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
-    private final String CALLBACK_URL = "https://uat.citconpay.com/payment/notify_wechatpay.php";
-
-
-    private final String REF_ID_CN = "CNY-mobile-test";
-    private final String AUTH_TOKEN_CN = "CNYAPPF6A0FE479A891BF45706A690AE";
-    private final String CALLBACK_URL_CN = "http://52.87.248.227/ipn.php";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
+
+        if(CURRENCY.equals(sdk.Currency.USD)){
+            REF_ID = "pay-mobile-test";
+            AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+            CALLBACK_URL = "https://uat.citconpay.com/payment/notify_wechatpay.php";
+        }else {
+            REF_ID = "CNY-mobile-test";
+            AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
+            CALLBACK_URL = "http://52.87.248.227/ipn.php";
+        }
+
 
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
@@ -68,13 +76,13 @@ public class DemoActivity extends AppCompatActivity {
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
-        mReferenceIdEditText.setText(IS_RMB ? REF_ID_CN : REF_ID); //Citcon Referance ID
+        mReferenceIdEditText.setText(REF_ID); //Citcon Referance ID
         mSubjectEditText.setText("Test"); // order subject
         mBodyEditText.setText("Test data"); // order body
         mAmountEditText.setText("1"); // amount
-        mCurrencyEditText.setText(IS_RMB ? "CNY": "USD"); // currency USD
+        mCurrencyEditText.setText(CURRENCY); // currency USD
         mVendorEditText.setText("wechatpay"); // payment vendor wechatpay or alipay
-        mIpnEditText.setText(IS_RMB ? CALLBACK_URL_CN : CALLBACK_URL); //citcon payment callback url
+        mIpnEditText.setText(CALLBACK_URL); //citcon payment callback url
         mCallbackEditText.setText("http://www.google.com"); // custom callback url to customization processing
 
         Button requestButton = (Button) findViewById(R.id.request_button);
@@ -154,14 +162,14 @@ public class DemoActivity extends AppCompatActivity {
      * <p>Init CPaySDK with AUTH_TOKEN, WXAPP_ID. Register BroadcastReceiver of payment success
      * AUTH_TOKEN author token apply from Citcon.
      * WXAPP_ID wechat appid from Wechat
-     * ENV environment String  uat cny dev
+     * Env environment String  uat cny dev
      */
 
 
     @Override
     public void onResume() {
         super.onResume();
-        CPaySDK.getInstance(DemoActivity.this, IS_RMB ? AUTH_TOKEN_CN : AUTH_TOKEN, IS_RMB, ENV).onResume();
+        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN, CURRENCY, ENV).onResume();
         registerInquireReceiver();
     }
 

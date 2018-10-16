@@ -12,9 +12,6 @@ import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import sdk.interfaces.InquireResponse;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
@@ -38,8 +35,8 @@ public class CPaySDK {
     private Activity mActivity;
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
-    private String env;
-    private boolean isRMB;
+    private String env = Env.PROD;
+    private boolean isRMB = false;
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
@@ -60,7 +57,7 @@ public class CPaySDK {
     }
 
     public static String getEnv(){
-        return sInstance == null ? "dev": sInstance.env;
+        return sInstance == null ? Env.PROD: sInstance.env;
     }
 
     public static boolean getIsRMB(){
@@ -68,15 +65,19 @@ public class CPaySDK {
 
     }
 
-    public static synchronized CPaySDK getInstance(Activity activity, String token, boolean isRMB, String env) {
+    public static synchronized CPaySDK getInstance(Activity activity, String token, String currency, String env) {
         if (sInstance == null)
             sInstance = new CPaySDK(activity);
 
         sInstance.mActivity = activity;
         sInstance.mToken = token;
         sInstance.env = env;
-        sInstance.isRMB = isRMB;
+        sInstance.isRMB = currency.equals(Currency.RMB);
         return sInstance;
+    }
+
+    public static synchronized CPaySDK getInstance(Activity activity, String token) {
+        return getInstance(activity, token, Currency.USD, Env.PROD);
     }
 
 

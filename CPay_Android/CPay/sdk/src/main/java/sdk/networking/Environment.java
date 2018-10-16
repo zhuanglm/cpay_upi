@@ -17,5 +17,4 @@ public abstract class Environment
     public static final String URL_RMB_UAT = "https://cny-uat.citconpay.com/";
     public static final String URL_RMB_PRO = "https://cny.citcon-mkt.com/";
 
-
 }
