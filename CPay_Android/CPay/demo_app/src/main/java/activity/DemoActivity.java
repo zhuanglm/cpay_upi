@@ -15,11 +15,8 @@ import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-
 import citcon.cpay.R;
-import sdk.AnnotationCurrency;
 import sdk.CPaySDK;
-import sdk.Currency;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
