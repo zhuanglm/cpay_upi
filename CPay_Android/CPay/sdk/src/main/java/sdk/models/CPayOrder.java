@@ -1,7 +1,11 @@
 package sdk.models;
 
+import android.text.TextUtils;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import sdk.networking.Environment;
 
 /**
  * Created by alexandrudiaconu on 7/22/17.
@@ -22,10 +26,17 @@ public class CPayOrder
     public String getmVendor() {
         return mVendor;
     }
-
     public void setmVendor(String mVendor){
         this.mVendor = mVendor;
     }
+
+    public void setmCurrency(String currency){
+        this.mCurrency = currency;
+    }
+
+    public String getmCurrency(){
+        return this.mCurrency;
+}
 
     public CPayOrder(){
 
@@ -36,7 +47,7 @@ public class CPayOrder
     {
         mReferenceId = referenceId;
         mAmount = amount;
-        mCurrency = currency;
+        mCurrency = TextUtils.isEmpty(currency) || (!currency.equals(Environment.USD) && !currency.equals(Environment.CNY))? Environment.USD: currency;
         mVendor = vendor;
         mSubject = subject;
         mBody = body;

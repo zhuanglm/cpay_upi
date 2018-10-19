@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 //USD - citcon.cpay
-//RMB - com.cpay.cpaydemo
+//CNY - com.cpay.cpaydemo
 
 android {
     compileSdkVersion 27

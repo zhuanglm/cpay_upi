@@ -19,6 +19,7 @@ import sdk.models.CPayOrder;
 import sdk.models.CPayOrderResult;
 import sdk.models.WXPayorder;
 import sdk.networking.APIManager;
+import sdk.networking.Environment;
 
 /**
  * Created by alexandrudiaconu on 7/20/17.
@@ -30,13 +31,11 @@ public class CPaySDK {
     private APIManager mApiManager;
     private OrderResponse<CPayOrderResult> mOrderListener;
     private InquireResponse<CPayInquireResult> mInquireListener;
-
     public String mToken;
     private Activity mActivity;
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
     private String env = Env.PROD;
-    private boolean isRMB = false;
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
@@ -44,40 +43,30 @@ public class CPaySDK {
     }
 
 
-    public static void setWXAppId(String wxAppId){
+    public static void setWXAppId(String wxAppId) {
         sInstance.mWXAppId = wxAppId;
     }
 
-    public static String getWXAppId(){
+    public static String getWXAppId() {
         return sInstance.mWXAppId;
     }
 
-    public static void setEnv(String env){
+    public static void setEnv(String env) {
         sInstance.env = env;
     }
 
-    public static String getEnv(){
-        return sInstance == null ? Env.PROD: sInstance.env;
+    public static String getEnv() {
+        return sInstance == null ? Env.PROD : sInstance.env;
     }
 
-    public static boolean getIsRMB(){
-        return sInstance != null && sInstance.isRMB;
 
-    }
-
-    public static synchronized CPaySDK getInstance(Activity activity, String token, String currency, String env) {
+    public static synchronized CPaySDK getInstance(Activity activity, String token) {
         if (sInstance == null)
             sInstance = new CPaySDK(activity);
 
         sInstance.mActivity = activity;
         sInstance.mToken = token;
-        sInstance.env = env;
-        sInstance.isRMB = currency.equals(Currency.RMB);
         return sInstance;
-    }
-
-    public static synchronized CPaySDK getInstance(Activity activity, String token) {
-        return getInstance(activity, token, Currency.USD, Env.PROD);
     }
 
 
@@ -220,12 +209,14 @@ public class CPaySDK {
         });
     }
 
-    public void gotWX(WXPayorder result) {
+    public void gotWX(WXPayorder result, String mCurrency) {
         if (result != null) {
             mOrderResult = new CPayOrderResult();
+            mOrderResult.mCurrency = mCurrency;
             mOrderResult.mOrder = new CPayOrder();
             mOrderResult.mOrderId = result.extData;
             mOrderResult.mOrder.setmVendor("wechatpay");
+            mOrderResult.mOrder.setmCurrency(mCurrency);
 
             PayReq req = new PayReq();
             req.appId = result.appid;
@@ -237,8 +228,8 @@ public class CPaySDK {
             req.sign = result.sign;
             req.extData = result.extData;
 
-            Log.d("jim","check args "+ req.checkArgs());
-            Log.d("jim","send return :"+ api.sendReq(req));
+            Log.d("jim", "check args " + req.checkArgs());
+            Log.d("jim", "send return :" + api.sendReq(req));
 
 
         } else {
@@ -249,9 +240,22 @@ public class CPaySDK {
     }
 
     public void onWXPaySuccess(String orderId) {
-        if(orderId.equals(mOrderResult.mOrderId)){
+        if (orderId.equals(mOrderResult.mOrderId)) {
             inquireOrderInternally();
         }
     }
+
+    public static String getBaseURL(String currency) {
+        String env = CPaySDK.getEnv();
+        if (env.equals(Env.UAT)) {
+            return currency.equals(Environment.CNY) ? Environment.URL_RMB_UAT : Environment.URL_USD_UAT;
+        } else if (env.equals(Env.DEV)) {
+            return currency.equals(Environment.CNY) ? Environment.URL_RMB_DEV : Environment.URL_USD_DEV;
+        } else {
+            // prod
+            return currency.equals(Environment.CNY) ? Environment.URL_RMB_PROD : Environment.URL_USD_PROD;
+        }
+    }
+
 
 }

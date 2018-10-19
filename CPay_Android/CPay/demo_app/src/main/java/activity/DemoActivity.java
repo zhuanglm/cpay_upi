@@ -32,13 +32,11 @@ public class DemoActivity extends AppCompatActivity {
     // After Pay success query transaction result
 
     private BroadcastReceiver mInquireReceiver;
-    private static String CURRENCY = sdk.Currency.USD;
-    private static String ENV = sdk.Env.PROD;
+    private static String ENV = sdk.Env.DEV;
 
     private String REF_ID;
     private String AUTH_TOKEN;
     private String CALLBACK_URL;
-
 
 
     @Override
@@ -46,14 +44,19 @@ public class DemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
 
-        if(CURRENCY.equals(sdk.Currency.USD)){
+        boolean testUSD = true;
+        String CURRENCY;
+
+        if (testUSD) {
             REF_ID = "pay-mobile-test";
             AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
             CALLBACK_URL = "https://uat.citconpay.com/payment/notify_wechatpay.php";
-        }else {
+            CURRENCY = "USD";
+        } else {
             REF_ID = "CNY-mobile-test";
             AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
             CALLBACK_URL = "http://52.87.248.227/ipn.php";
+            CURRENCY = "CNY";
         }
 
 
@@ -166,7 +169,8 @@ public class DemoActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN, CURRENCY, ENV).onResume();
+        CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
+        CPaySDK.setEnv(ENV);
         registerInquireReceiver();
     }
 
