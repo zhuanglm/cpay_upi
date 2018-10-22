@@ -1,10 +1,10 @@
 package sdk.networking;
 
 /**
- * Created by alexandrudiaconu on 7/22/17.
+ * Created by citcon.
  */
 
-public abstract class Environment
+public abstract class CPayEnv
 {
 
     // NON-CNY

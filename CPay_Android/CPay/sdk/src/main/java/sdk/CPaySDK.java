@@ -19,7 +19,7 @@ import sdk.models.CPayOrder;
 import sdk.models.CPayOrderResult;
 import sdk.models.WXPayorder;
 import sdk.networking.APIManager;
-import sdk.networking.Environment;
+import sdk.networking.CPayEnv;
 
 /**
  * Created by alexandrudiaconu on 7/20/17.
@@ -35,7 +35,7 @@ public class CPaySDK {
     private Activity mActivity;
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
-    private String env = Env.PROD;
+    private CPayMode env = CPayMode.PROD;
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
@@ -51,12 +51,12 @@ public class CPaySDK {
         return sInstance.mWXAppId;
     }
 
-    public static void setEnv(String env) {
+    public static void setMode(CPayMode env) {
         sInstance.env = env;
     }
 
-    public static String getEnv() {
-        return sInstance == null ? Env.PROD : sInstance.env;
+    public static CPayMode getMode() {
+        return sInstance == null ? CPayMode.PROD : sInstance.env;
     }
 
 
@@ -230,13 +230,9 @@ public class CPaySDK {
 
             Log.d("jim", "check args " + req.checkArgs());
             Log.d("jim", "send return :" + api.sendReq(req));
-
-
         } else {
             mOrderListener.gotOrderResult(null);
-
         }
-
     }
 
     public void onWXPaySuccess(String orderId) {
@@ -246,16 +242,14 @@ public class CPaySDK {
     }
 
     public static String getBaseURL(String currency) {
-        String env = CPaySDK.getEnv();
-        if (env.equals(Env.UAT)) {
-            return currency.equals(Environment.CNY) ? Environment.URL_RMB_UAT : Environment.URL_USD_UAT;
-        } else if (env.equals(Env.DEV)) {
-            return currency.equals(Environment.CNY) ? Environment.URL_RMB_DEV : Environment.URL_USD_DEV;
+        CPayMode env = CPaySDK.getMode();
+        if (env.equals(CPayMode.UAT)) {
+            return currency.equals(CPayEnv.CNY) ? CPayEnv.URL_RMB_UAT : CPayEnv.URL_USD_UAT;
+        } else if (env.equals(CPayMode.DEV)) {
+            return currency.equals(CPayEnv.CNY) ? CPayEnv.URL_RMB_DEV : CPayEnv.URL_USD_DEV;
         } else {
             // prod
-            return currency.equals(Environment.CNY) ? Environment.URL_RMB_PROD : Environment.URL_USD_PROD;
+            return currency.equals(CPayEnv.CNY) ? CPayEnv.URL_RMB_PROD : CPayEnv.URL_USD_PROD;
         }
     }
-
-
 }

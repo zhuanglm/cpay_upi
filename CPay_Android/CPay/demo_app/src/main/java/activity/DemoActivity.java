@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import citcon.cpay.R;
 import sdk.CPaySDK;
+import sdk.CPayMode;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
@@ -32,7 +33,7 @@ public class DemoActivity extends AppCompatActivity {
     // After Pay success query transaction result
 
     private BroadcastReceiver mInquireReceiver;
-    private static String ENV = sdk.Env.DEV;
+    private static CPayMode ENV = CPayMode.DEV;
 
     private String REF_ID;
     private String AUTH_TOKEN;
@@ -162,7 +163,7 @@ public class DemoActivity extends AppCompatActivity {
      * <p>Init CPaySDK with AUTH_TOKEN, WXAPP_ID. Register BroadcastReceiver of payment success
      * AUTH_TOKEN author token apply from Citcon.
      * WXAPP_ID wechat appid from Wechat
-     * Env environment String  uat cny dev
+     * CPayMode environment String  PROD, UAT, DEV
      */
 
 
@@ -170,7 +171,7 @@ public class DemoActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
-        CPaySDK.setEnv(ENV);
+        CPaySDK.setMode(ENV);
         registerInquireReceiver();
     }
 
