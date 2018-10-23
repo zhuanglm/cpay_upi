@@ -24,8 +24,10 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         String wxAppId = CPaySDK.getWXAppId();
-        api = WXAPIFactory.createWXAPI(this, wxAppId);
-        api.handleIntent(getIntent(), this);
+        if(wxAppId != null){
+            api = WXAPIFactory.createWXAPI(this, wxAppId);
+            api.handleIntent(getIntent(), this);
+        }
     }
 
     @Override
@@ -54,6 +56,8 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
         }else {
             Toast.makeText(this, "Error code:" + resp.errCode + " other error", Toast.LENGTH_LONG).show();
         }
+        orderID = getIntent().getStringExtra("_wxapi_payresp_extdata");
+        CPaySDK.getInstance().onWXPayFailed(orderID);
         finish();
     }
 

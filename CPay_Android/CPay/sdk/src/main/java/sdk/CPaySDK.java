@@ -36,6 +36,7 @@ public class CPaySDK {
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
     private CPayMode env = CPayMode.PROD;
+    private boolean allowQuery = false;
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
@@ -48,6 +49,9 @@ public class CPaySDK {
     }
 
     public static String getWXAppId() {
+        if(sInstance ==  null){
+            return null;
+        }
         return sInstance.mWXAppId;
     }
 
@@ -104,11 +108,12 @@ public class CPaySDK {
     }
 
     public void onResume() {
-        if (mOrderListener != null && mOrderResult != null && mOrderResult.mRedirectUrl != null) {
+        // check pay
+        if (mOrderListener != null && mOrderResult != null && mOrderResult.mRedirectUrl != null && allowQuery) {
             inquireOrderInternally();
-
             mOrderListener.gotOrderResult(mOrderResult);
             mOrderListener = null;
+            allowQuery = false;
         }
     }
 
@@ -133,6 +138,7 @@ public class CPaySDK {
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
+            allowQuery = true;
             if (msg.obj instanceof String) {
                 try {
                     String result = (String) msg.obj;
@@ -157,16 +163,17 @@ public class CPaySDK {
                 }
 
                 inquireOrderInternally();
-
-                mOrderListener.gotOrderResult(mOrderResult);
+                if(mOrderListener != null){
+                    mOrderListener.gotOrderResult(mOrderResult);
+                }
             }
-
             return true;
         }
     });
 
 
     private void inquireOrderInternally() {
+
         CPaySDK.getInstance().inquireOrder(mOrderResult, new InquireResponse<CPayInquireResult>() {
             @Override
             public void gotInquireResult(CPayInquireResult response) {
@@ -240,6 +247,13 @@ public class CPaySDK {
             inquireOrderInternally();
         }
     }
+
+    public void onWXPayFailed(String orderId) {
+        if (orderId.equals(mOrderResult.mOrderId)) {
+            inquireOrderInternally();
+        }
+    }
+
 
     public static String getBaseURL(String currency) {
         CPayMode env = CPaySDK.getMode();
