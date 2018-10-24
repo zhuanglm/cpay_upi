@@ -5,42 +5,64 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
+
 import citcon.cpay.R;
 import sdk.CPaySDK;
-import sdk.interfaces.InquireResponse;
+import sdk.CPayMode;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
 import sdk.models.CPayOrderResult;
 
-public class DemoActivity extends AppCompatActivity
-{
+public class DemoActivity extends AppCompatActivity {
     private EditText mReferenceIdEditText, mSubjectEditText, mBodyEditText, mAmountEditText,
             mCurrencyEditText, mVendorEditText, mIpnEditText, mCallbackEditText;
     private Switch mSwitch;
     private TextView mResultTextView;
     private ScrollView mScrollView;
-    private BroadcastReceiver mInquireReceiver;
 
-    private final String AUTH_TOKEN = "[MerchantToken]";
+    // After Pay success query transaction result
+
+    private BroadcastReceiver mInquireReceiver;
+    private static CPayMode ENV = CPayMode.UAT;
+
+    private String REF_ID;
+    private String AUTH_TOKEN;
+    private String CALLBACK_URL;
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
 
+        boolean testUSD = true;
+        String CURRENCY;
+
+        if (testUSD) {
+            REF_ID = "pay-mobile-test";
+            AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+            CALLBACK_URL = "https://uat.citconpay.com/payment/notify_wechatpay.php";
+            CURRENCY = "USD";
+        } else {
+            REF_ID = "CNY-mobile-test";
+            AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
+            CALLBACK_URL = "http://52.87.248.227/ipn.php";
+            CURRENCY = "CNY";
+        }
+
+
         ActivityCompat.requestPermissions(this,
-                new String[]{ Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 1);
 
         mReferenceIdEditText = (EditText) findViewById(R.id.reference_id_editText);
@@ -55,20 +77,19 @@ public class DemoActivity extends AppCompatActivity
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
-        mReferenceIdEditText.setText("1ZLLJULOCRW3LAU");
-        mSubjectEditText.setText("测试");
-        mBodyEditText.setText("我是测试数据");
-        mAmountEditText.setText("1");
-        mCurrencyEditText.setText("USD");
-        mVendorEditText.setText("alipay");
-        mIpnEditText.setText("http://www.xxx.com");
-        mCallbackEditText.setText("http://www.google.com");
+        mReferenceIdEditText.setText(REF_ID); //Citcon Referance ID
+        mSubjectEditText.setText("Test"); // order subject
+        mBodyEditText.setText("Test data"); // order body
+        mAmountEditText.setText("1"); // amount
+        mCurrencyEditText.setText(CURRENCY); // currency USD
+        mVendorEditText.setText("wechatpay"); // payment vendor wechatpay or alipay
+        mIpnEditText.setText(CALLBACK_URL); //citcon payment callback url
+        mCallbackEditText.setText("http://www.google.com"); // custom callback url to customization processing
 
         Button requestButton = (Button) findViewById(R.id.request_button);
         requestButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
                         mSubjectEditText.getText().toString(),
                         mBodyEditText.getText().toString(),
@@ -78,66 +99,59 @@ public class DemoActivity extends AppCompatActivity
                         mIpnEditText.getText().toString(),
                         mCallbackEditText.getText().toString(),
                         mSwitch.isChecked());
-                CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>()
-                {
+
+                CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>() {
                     @Override
-                    public void gotOrderResult(final CPayOrderResult orderResult)
-                    {
-                        if(orderResult != null)
-                        {
+                    public void gotOrderResult(final CPayOrderResult orderResult) {
+                        if (orderResult != null) {
+
                         }
                     }
                 });
             }
         });
 
-        mInquireReceiver = new BroadcastReceiver()
-        {
+        /**
+         *
+         * <p>Get payment success broadcasting CPayInquireResult
+         *
+         */
+        mInquireReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 CPayInquireResult response = (CPayInquireResult) intent.getSerializableExtra("inquire_result");
                 String emerging = "";
                 emerging += "CHECK RESULT:\n\n";
-                if(response.mId != null)
-                {
+                if (response.mId != null) {
                     emerging += "ORDER ID: " + response.mId + "\n";
                 }
-                if(response.mType != null)
-                {
+                if (response.mType != null) {
                     emerging += "TYPE: " + response.mType + "\n";
                 }
-                if(response.mAmount != null)
-                {
+                if (response.mAmount != null) {
                     emerging += "AMOUNT: " + response.mAmount + "\n";
                 }
-                if(response.mTime != null)
-                {
+                if (response.mTime != null) {
                     emerging += "TIME: " + response.mTime + "\n";
                 }
-                if(response.mReference != null)
-                {
+                if (response.mReference != null) {
                     emerging += "REFERENCE: " + response.mReference + "\n";
                 }
-                if(response.mStatus != null)
-                {
+                if (response.mStatus != null) {
                     emerging += "STATUS: " + response.mStatus + "\n";
                 }
-                if(response.mCurrency != null)
-                {
+                if (response.mCurrency != null) {
                     emerging += "CURRENCY: " + response.mCurrency + "\n";
                 }
-                if(response.mNote != null)
-                {
+                if (response.mNote != null) {
                     emerging += "NOTE: " + response.mNote + "\n";
                 }
 
                 mResultTextView.setText(emerging);
 
-                mScrollView.post(new Runnable()
-                {
+                mScrollView.post(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
                     }
                 });
@@ -145,37 +159,49 @@ public class DemoActivity extends AppCompatActivity
         };
     }
 
+    /**
+     * <p>Init CPaySDK with AUTH_TOKEN, WXAPP_ID. Register BroadcastReceiver of payment success
+     * AUTH_TOKEN author token apply from Citcon.
+     * WXAPP_ID wechat appid from Wechat
+     * CPayMode environment String  PROD, UAT, DEV
+     */
+
+
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
-
         CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
-
+        CPaySDK.setMode(ENV);
         registerInquireReceiver();
     }
 
+    /**
+     * <p>onPause to unregister BroadcastReceiver.
+     */
+
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         super.onPause();
 
         unregisterInquireReceiver();
     }
 
-    private void registerInquireReceiver()
-    {
-        if(mInquireReceiver != null)
-        {
+    /**
+     * Register BroadcastReceiver.
+     */
+    private void registerInquireReceiver() {
+        if (mInquireReceiver != null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction("CPAY_INQUIRE_ORDER");
             registerReceiver(mInquireReceiver, filter);
         }
     }
 
-    private void unregisterInquireReceiver()
-    {
-        if(mInquireReceiver != null)
+    /**
+     * <p>unregister BroadcastReceiver.
+     */
+    private void unregisterInquireReceiver() {
+        if (mInquireReceiver != null)
             unregisterReceiver(mInquireReceiver);
     }
 }

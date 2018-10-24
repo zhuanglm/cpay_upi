@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/CPay.iml" filepath="$PROJECT_DIR$/CPay.iml" />
       <module fileurl="file://$PROJECT_DIR$/demo_app/demo_app.iml" filepath="$PROJECT_DIR$/demo_app/demo_app.iml" />
       <module fileurl="file://$PROJECT_DIR$/sdk/sdk.iml" filepath="$PROJECT_DIR$/sdk/sdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sdk/sdk.iml" filepath="$PROJECT_DIR$/sdk/sdk.iml" />
     </modules>
   </component>
 </project>

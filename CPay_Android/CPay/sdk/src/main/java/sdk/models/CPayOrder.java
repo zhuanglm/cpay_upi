@@ -1,9 +1,11 @@
 package sdk.models;
 
-import org.json.JSONObject;
+import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import sdk.networking.CPayEnv;
 
 /**
  * Created by alexandrudiaconu on 7/22/17.
@@ -21,12 +23,31 @@ public class CPayOrder
     private String mCallbackUrl;
     private boolean mAllowDuplicate;
 
+    public String getmVendor() {
+        return mVendor;
+    }
+    public void setmVendor(String mVendor){
+        this.mVendor = mVendor;
+    }
+
+    public void setmCurrency(String currency){
+        this.mCurrency = currency;
+    }
+
+    public String getmCurrency(){
+        return this.mCurrency;
+}
+
+    public CPayOrder(){
+
+    }
+
     public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
                      boolean allowDuplicate)
     {
         mReferenceId = referenceId;
         mAmount = amount;
-        mCurrency = currency;
+        mCurrency = TextUtils.isEmpty(currency) || (!currency.equals(CPayEnv.USD) && !currency.equals(CPayEnv.CNY))? CPayEnv.USD: currency;
         mVendor = vendor;
         mSubject = subject;
         mBody = body;
