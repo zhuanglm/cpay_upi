@@ -6,24 +6,22 @@ import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+
 import sdk.CPaySDK;
 
-/**
- * Created by alexandrudiaconu on 7/22/17.
- */
 
-public class CPayOrderRequest extends Request<JSONObject>
-{
+public class WXPayOrderRequest extends Request<JSONObject> {
+    private final Map<String, String> mParams;
     private Response.Listener<JSONObject> mListener;
-    private Map<String, String> mParams;
 
-    public CPayOrderRequest(int method, String url, Map<String, String> params,
-                            Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
+    public WXPayOrderRequest(int method, String url, Map<String, String> params, Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         this.mListener = reponseListener;
         this.mParams = params;
@@ -34,6 +32,7 @@ public class CPayOrderRequest extends Request<JSONObject>
     {
         return mParams;
     }
+
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
@@ -63,4 +62,5 @@ public class CPayOrderRequest extends Request<JSONObject>
         headers.put("Authorization", auth);
         return headers;
     }
+
 }
