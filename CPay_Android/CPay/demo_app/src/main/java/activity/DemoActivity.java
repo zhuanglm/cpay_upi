@@ -33,7 +33,7 @@ public class DemoActivity extends AppCompatActivity {
     // After Pay success query transaction result
 
     private BroadcastReceiver mInquireReceiver;
-    private static CPayMode ENV = CPayMode.DEV;
+    private static CPayMode ENV = CPayMode.UAT;
 
     private String REF_ID;
     private String AUTH_TOKEN;
