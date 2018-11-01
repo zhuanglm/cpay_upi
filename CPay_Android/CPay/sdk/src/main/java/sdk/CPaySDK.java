@@ -246,6 +246,7 @@ public class CPaySDK {
         if (orderId.equals(mOrderResult.mOrderId)) {
             inquireOrderInternally();
             if(mOrderListener != null){
+                mOrderResult.mStatus = "success";
                 mOrderListener.gotOrderResult(mOrderResult);
             }
         }
