@@ -245,12 +245,18 @@ public class CPaySDK {
     public void onWXPaySuccess(String orderId) {
         if (orderId.equals(mOrderResult.mOrderId)) {
             inquireOrderInternally();
+            if(mOrderListener != null){
+                mOrderListener.gotOrderResult(mOrderResult);
+            }
         }
     }
 
     public void onWXPayFailed(String orderId) {
         if (orderId.equals(mOrderResult.mOrderId)) {
             inquireOrderInternally();
+            if(mOrderListener != null){
+                mOrderListener.gotOrderResult(mOrderResult);
+            }
         }
     }
 
