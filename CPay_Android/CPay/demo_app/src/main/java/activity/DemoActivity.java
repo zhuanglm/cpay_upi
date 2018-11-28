@@ -39,13 +39,14 @@ public class DemoActivity extends AppCompatActivity {
     private String AUTH_TOKEN;
     private String CALLBACK_URL;
 
+    boolean testUSD = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
 
-        boolean testUSD = true;
         String CURRENCY;
 
         if (testUSD) {
@@ -55,7 +56,8 @@ public class DemoActivity extends AppCompatActivity {
             CURRENCY = "USD";
         } else {
             REF_ID = "CNY-mobile-test";
-            AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
+            // AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
+            AUTH_TOKEN = "CNYE0CF6A0FE479A891BF45706A690AF";
             CALLBACK_URL = "http://52.87.248.227/ipn.php";
             CURRENCY = "CNY";
         }
@@ -171,7 +173,11 @@ public class DemoActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
-        CPaySDK.setMode(ENV);
+        if (testUSD) {
+            CPaySDK.setMode(ENV);
+        } else {
+            CPaySDK.setMode(CPayMode.PROD);
+        }
         registerInquireReceiver();
     }
 
