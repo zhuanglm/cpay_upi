@@ -303,10 +303,12 @@ public class CPaySDK {
         }
     }
 
-    public void onWXPayFailed(String orderId) {
+    public void onWXPayFailed(String orderId, int respCode, String errMsg) {
         if (orderId.equals(mOrderResult.mOrderId)) {
             inquireOrderInternally();
             if(mOrderListener != null){
+                mOrderResult.mStatus = Integer.toString(respCode);
+                mOrderResult.mMessage = errMsg;
                 mOrderListener.gotOrderResult(mOrderResult);
             }
         }
