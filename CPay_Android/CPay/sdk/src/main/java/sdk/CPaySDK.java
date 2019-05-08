@@ -12,6 +12,9 @@ import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import sdk.interfaces.InquireResponse;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
@@ -117,22 +120,93 @@ public class CPaySDK {
         }
     }
 
+    private String getAlipayOrderInfo() {
+        if (mOrderResult.mCurrency.equals("CNY")) {
+            return mOrderResult.mOrderSpec + "&sign=" + mOrderResult.mSignedString;
+        } else {
+            return mOrderResult.mOrderSpec + "&sign=\"" + mOrderResult.mSignedString + "\"&sign_type=\"RSA\"";
+        }
+    }
+
+    private void alipayCNY(String orderInfo) {
+        PayTask alipay = new PayTask(mActivity);
+        Map<String, String> result = alipay.payV2(orderInfo, true);
+
+        Message msg = new Message();
+        msg.obj = result;
+        mHandler.sendMessage(msg);
+    }
+
+    private void alipayUSD(String orderInfo) {
+        PayTask alipay = new PayTask(mActivity);
+        String result = alipay.pay(orderInfo, true);
+
+        Message msg = new Message();
+        msg.obj = result;
+        mHandler.sendMessage(msg);
+    }
+
     private void payByAlipay() {
-        final String orderInfo = mOrderResult.mOrderSpec + "&sign=\"" + mOrderResult.mSignedString + "\"&sign_type=\"RSA\"";
+        final String orderInfo = getAlipayOrderInfo();
 
         Runnable payRunnable = new Runnable() {
             @Override
             public void run() {
-                PayTask alipay = new PayTask(mActivity);
-                String result = alipay.pay(orderInfo, true);
-
-                Message msg = new Message();
-                msg.obj = result;
-                mHandler.sendMessage(msg);
+                if (mOrderResult.mCurrency.equals("CNY")) {
+                    alipayCNY(orderInfo);
+                } else {
+                    alipayUSD(orderInfo);
+                }
             }
         };
         Thread payThread = new Thread(payRunnable);
         payThread.start();
+    }
+
+    private void handleAlipayCNYResult(Message msg) {
+        try {
+            HashMap<String, String> result = (HashMap<String, String>) msg.obj;
+            if (mOrderResult != null) {
+                mOrderResult.mStatus = result.get("resultStatus");
+                mOrderResult.mMessage = result.get("memo");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        inquireOrderInternally();
+        if (mOrderListener != null) {
+            mOrderListener.gotOrderResult(mOrderResult);
+        }
+    }
+
+    private void handleAlipayUSDResult(Message msg) {
+        try {
+            String result = (String) msg.obj;
+            String[] kvp = result.split(";");
+            for (String kv : kvp) {
+                String[] entry = kv.split("=");
+                String key = entry[0];
+                if (key.equals("resultStatus")) {
+                    String value = entry[1].replace("{", "").replace("}", "");
+                    if (mOrderResult != null) {
+                        mOrderResult.mStatus = value;
+                    }
+                } else if (key.equals("memo")) {
+                    String value = entry[1].replace("{", "").replace("}", "");
+                    if (mOrderResult != null) {
+                        mOrderResult.mMessage = value;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        inquireOrderInternally();
+        if(mOrderListener != null){
+            mOrderListener.gotOrderResult(mOrderResult);
+        }
     }
 
     private Handler mHandler = new Handler(new Handler.Callback() {
@@ -140,32 +214,9 @@ public class CPaySDK {
         public boolean handleMessage(Message msg) {
             allowQuery = true;
             if (msg.obj instanceof String) {
-                try {
-                    String result = (String) msg.obj;
-                    String[] kvp = result.split(";");
-                    for (String kv : kvp) {
-                        String[] entry = kv.split("=");
-                        String key = entry[0];
-                        if (key.equals("resultStatus")) {
-                            String value = entry[1].replace("{", "").replace("}", "");
-                            if (mOrderResult != null) {
-                                mOrderResult.mStatus = value;
-                            }
-                        } else if (key.equals("memo")) {
-                            String value = entry[1].replace("{", "").replace("}", "");
-                            if (mOrderResult != null) {
-                                mOrderResult.mMessage = value;
-                            }
-                        }
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                inquireOrderInternally();
-                if(mOrderListener != null){
-                    mOrderListener.gotOrderResult(mOrderResult);
-                }
+                handleAlipayUSDResult(msg);
+            } else if (msg.obj instanceof HashMap) {
+                handleAlipayCNYResult(msg);
             }
             return true;
         }
@@ -252,10 +303,12 @@ public class CPaySDK {
         }
     }
 
-    public void onWXPayFailed(String orderId) {
+    public void onWXPayFailed(String orderId, int respCode, String errMsg) {
         if (orderId.equals(mOrderResult.mOrderId)) {
             inquireOrderInternally();
             if(mOrderListener != null){
+                mOrderResult.mStatus = Integer.toString(respCode);
+                mOrderResult.mMessage = errMsg;
                 mOrderListener.gotOrderResult(mOrderResult);
             }
         }
