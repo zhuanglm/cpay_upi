@@ -14,9 +14,9 @@ public abstract class CPayEnv
     public static final String USD = "USD";
 
     // CNY
-    public static final String URL_RMB_DEV = "https://cny-dev.citcon-mkt.com/";
-    public static final String URL_RMB_UAT = "https://cny-uat.citconpay.com/";
-    public static final String URL_RMB_PROD = "https://cny.citcon-mkt.com/";
+    public static final String URL_RMB_DEV = "https://dev.citconpay.cn/";
+    public static final String URL_RMB_UAT = "https://uat.citconpay.cn/";
+    public static final String URL_RMB_PROD = "https://citconpay.cn/";
 
     public static final String CNY = "CNY";
 }
