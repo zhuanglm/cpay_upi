@@ -47,7 +47,7 @@ public class CPayOrder
     {
         mReferenceId = referenceId;
         mAmount = amount;
-        mCurrency = TextUtils.isEmpty(currency) || (!currency.equals(CPayEnv.USD) && !currency.equals(CPayEnv.CNY))? CPayEnv.USD: currency;
+        mCurrency = TextUtils.isEmpty(currency) /*|| (!currency.equals(CPayEnv.USD) && !currency.equals(CPayEnv.CNY))*/? CPayEnv.USD: currency;
         mVendor = vendor;
         mSubject = subject;
         mBody = body;
