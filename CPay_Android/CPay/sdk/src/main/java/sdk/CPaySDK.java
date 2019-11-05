@@ -152,12 +152,11 @@ public class CPaySDK {
         Runnable payRunnable = new Runnable() {
             @Override
             public void run() {
-//                if (mOrderResult.mCurrency.equals("CNY")) {
-//                    alipayCNY(orderInfo);
-//                } else {
-//                    alipayUSD(orderInfo);
-//                }
-                alipayCNY(orderInfo);
+                if (mOrderResult.mCurrency.equals("CNY")) {
+                    alipayCNY(orderInfo);
+                } else {
+                    alipayUSD(orderInfo);
+                }
             }
         };
         Thread payThread = new Thread(payRunnable);
@@ -214,12 +213,11 @@ public class CPaySDK {
         @Override
         public boolean handleMessage(Message msg) {
             allowQuery = true;
-//            if (msg.obj instanceof String) {
-//                handleAlipayUSDResult(msg);
-//            } else if (msg.obj instanceof HashMap) {
-//                handleAlipayCNYResult(msg);
-//            }
-            handleAlipayCNYResult(msg);
+            if (msg.obj instanceof String) {
+                handleAlipayUSDResult(msg);
+            } else if (msg.obj instanceof HashMap) {
+                handleAlipayCNYResult(msg);
+            }
             return true;
         }
     });
