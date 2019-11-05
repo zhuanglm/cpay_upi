@@ -8,7 +8,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 27
         versionCode 3
-        versionName "2.2.0"
+        versionName "2.1.1"
 
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -38,7 +38,7 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -65,7 +65,7 @@ task makeJar(type: Copy) {
 
     from("${project.buildDir}/intermediates/packaged-classes/release/libs/")
     into("${project.buildDir}/libs/")
-    include('alipaySdk-20180403.jar')
+    include('alipaySdk-15.6.8-20191021122514.aar')
     include('volley.jar')
     include('wechat-sdk-android-without-mta-5.1.6.jar')
 
