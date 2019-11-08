@@ -5,6 +5,7 @@
             android:name="sdk.PaymentActivity"
             android:exported="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+
         <activity
             android:name="com.alipay.sdk.app.H5PayActivity"
             android:configChanges="orientation|keyboardHidden|navigation"
@@ -17,6 +18,7 @@
             android:exported="false"
             android:screenOrientation="behind" >
         </activity>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
