@@ -2,6 +2,9 @@
 
 The easiest way to receive WeChat Pay and Alipay on mobile app, the world's leading payment methods with over 1 billion users, anywhere and anytime.
 
+##  v2.1.4 - Dec 2, 2019
+* Update latest version of SDK and status code standardization
+
 ##	v2.1.2 - Nov 8, 2019
 * Update Alipay SDK
 
