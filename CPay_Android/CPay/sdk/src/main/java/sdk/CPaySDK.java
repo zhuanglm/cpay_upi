@@ -168,12 +168,14 @@ public class CPaySDK {
             HashMap<String, String> result = (HashMap<String, String>) msg.obj;
             if (mOrderResult != null) {
                 mOrderResult.mStatus = result.get("resultStatus");
+                mOrderResult.mStatus = "9000".equals(mOrderResult.mStatus) ? "0" : mOrderResult.mStatus; // Unified the success status
                 mOrderResult.mMessage = result.get("memo");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        allowQuery = false;
         inquireOrderInternally();
         if (mOrderListener != null) {
             mOrderListener.gotOrderResult(mOrderResult);
@@ -191,6 +193,7 @@ public class CPaySDK {
                     String value = entry[1].replace("{", "").replace("}", "");
                     if (mOrderResult != null) {
                         mOrderResult.mStatus = value;
+                        mOrderResult.mStatus = "9000".equals(mOrderResult.mStatus) ? "0" : mOrderResult.mStatus; // Unified the success status
                     }
                 } else if (key.equals("memo")) {
                     String value = entry[1].replace("{", "").replace("}", "");
@@ -203,6 +206,7 @@ public class CPaySDK {
             ex.printStackTrace();
         }
 
+        allowQuery = false;
         inquireOrderInternally();
         if(mOrderListener != null){
             mOrderListener.gotOrderResult(mOrderResult);
@@ -275,6 +279,7 @@ public class CPaySDK {
             mOrderResult.mOrderId = result.extData;
             mOrderResult.mOrder.setmVendor("wechatpay");
             mOrderResult.mOrder.setmCurrency(mCurrency);
+            mOrderResult.mRedirectUrl = "";
 
             PayReq req = new PayReq();
             req.appId = result.appid;
@@ -286,8 +291,18 @@ public class CPaySDK {
             req.sign = result.sign;
             req.extData = result.extData;
 
-            Log.d("jim", "check args " + req.checkArgs());
-            Log.d("jim", "send return :" + api.sendReq(req));
+            boolean argsCheck = req.checkArgs();
+            boolean callWxRet = api.sendReq(req);
+            Log.d("jim", "check args " + argsCheck);
+            Log.d("jim", "send return :" + callWxRet);
+
+            if (!callWxRet) {
+                mOrderResult.mStatus = "-2";
+                mOrderResult.mMessage = "WeChat is not installed on the device";
+                mOrderListener.gotOrderResult(mOrderResult);
+            } else {
+                allowQuery = true;
+            }
         } else {
             mOrderListener.gotOrderResult(null);
         }
@@ -295,9 +310,12 @@ public class CPaySDK {
 
     public void onWXPaySuccess(String orderId) {
         if (orderId.equals(mOrderResult.mOrderId)) {
+            allowQuery = false;
+
             inquireOrderInternally();
             if(mOrderListener != null){
-                mOrderResult.mStatus = "success";
+                mOrderResult.mStatus = "0"; // Unified the success status
+                mOrderResult.mMessage = "Success";
                 mOrderListener.gotOrderResult(mOrderResult);
             }
         }
@@ -305,6 +323,8 @@ public class CPaySDK {
 
     public void onWXPayFailed(String orderId, int respCode, String errMsg) {
         if (orderId.equals(mOrderResult.mOrderId)) {
+            allowQuery = false;
+
             inquireOrderInternally();
             if(mOrderListener != null){
                 mOrderResult.mStatus = Integer.toString(respCode);
