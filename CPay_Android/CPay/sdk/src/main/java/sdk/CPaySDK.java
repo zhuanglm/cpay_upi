@@ -1,10 +1,13 @@
 package sdk;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.alipay.sdk.app.PayTask;
@@ -40,10 +43,12 @@ public class CPaySDK {
     public String mWXAppId;
     private CPayMode env = CPayMode.PROD;
     private boolean allowQuery = false;
+    private LocalBroadcastManager localBroadcastManager;
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
         api = WXAPIFactory.createWXAPI(context, mWXAppId);
+        localBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
 
@@ -266,9 +271,22 @@ public class CPaySDK {
                 Intent intent = new Intent();
                 intent.setAction("CPAY_INQUIRE_ORDER");
                 intent.putExtra("inquire_result", response);
-                mActivity.sendBroadcast(intent);
+                localBroadcastManager.sendBroadcast(intent);
+                // mActivity.sendBroadcast(intent);
             }
         });
+    }
+
+    public void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        if (receiver != null && filter != null) {
+            localBroadcastManager.registerReceiver(receiver, filter);
+        }
+    }
+
+    public void unregisterReceiver(BroadcastReceiver receiver) {
+        if (receiver != null) {
+            localBroadcastManager.unregisterReceiver(receiver);
+        }
     }
 
     public void gotWX(WXPayorder result, String mCurrency) {
