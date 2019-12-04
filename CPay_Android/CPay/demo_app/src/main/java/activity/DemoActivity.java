@@ -39,7 +39,7 @@ public class DemoActivity extends AppCompatActivity {
     private String AUTH_TOKEN;
     private String CALLBACK_URL;
 
-    boolean testUSD = false;
+    boolean testUSD = true;
 
 
     @Override
@@ -174,7 +174,7 @@ public class DemoActivity extends AppCompatActivity {
         super.onResume();
         CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
         if (testUSD) {
-            CPaySDK.setMode(ENV);
+            CPaySDK.setMode(CPayMode.DEV);
         } else {
             CPaySDK.setMode(CPayMode.PROD);
         }
@@ -199,7 +199,7 @@ public class DemoActivity extends AppCompatActivity {
         if (mInquireReceiver != null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction("CPAY_INQUIRE_ORDER");
-            registerReceiver(mInquireReceiver, filter);
+            CPaySDK.getInstance().registerReceiver(mInquireReceiver, filter);
         }
     }
 
@@ -208,6 +208,6 @@ public class DemoActivity extends AppCompatActivity {
      */
     private void unregisterInquireReceiver() {
         if (mInquireReceiver != null)
-            unregisterReceiver(mInquireReceiver);
+            CPaySDK.getInstance().unregisterReceiver(mInquireReceiver);
     }
 }
