@@ -1,6 +1,7 @@
 package sdk.models;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class CPayOrder
     private String mBody;
     private String mIpnUrl;
     private String mCallbackUrl;
+    private String mTransCurrency;
     private boolean mAllowDuplicate;
 
     public String getmVendor() {
@@ -38,22 +40,27 @@ public class CPayOrder
         return this.mCurrency;
 }
 
+    public String getmTransCurrency() { return this.mTransCurrency; }
+
     public CPayOrder(){
 
     }
 
     public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
-                     boolean allowDuplicate)
+                     boolean allowDuplicate
+            , String transCurrency)
     {
         mReferenceId = referenceId;
         mAmount = amount;
-        mCurrency = TextUtils.isEmpty(currency) /*|| (!currency.equals(CPayEnv.USD) && !currency.equals(CPayEnv.CNY))*/? CPayEnv.USD: currency;
+//        mCurrency = TextUtils.isEmpty(currency) /*|| (!currency.equals(CPayEnv.USD) && !currency.equals(CPayEnv.CNY))*/? CPayEnv.USD: currency;
+        mCurrency = currency;
         mVendor = vendor;
         mSubject = subject;
         mBody = body;
         mIpnUrl = ipnUrl;
         mCallbackUrl = callbackUrl;
         mAllowDuplicate = allowDuplicate;
+        mTransCurrency = transCurrency;
     }
 
     public boolean isValid()
@@ -80,11 +87,24 @@ public class CPayOrder
         returned.put("subject", mSubject);
         returned.put("body", mBody);
         returned.put("amount", mAmount);
-        returned.put("currency", mCurrency);
+        returned.put("currency", TextUtils.isEmpty(mTransCurrency) ? mCurrency : mTransCurrency);
         returned.put("ipn_url", mIpnUrl);
         returned.put("callback_url", mCallbackUrl);
         returned.put("allow_duplicates", mAllowDuplicate ? "yes" : "no");
         returned.put("vendor", mVendor);
+
+        // TODO: test
+        Log.e("Citcon", "Request PayLoad");
+        Log.e("Citcon", "reference: " + mReferenceId);
+        Log.e("Citcon", "subject: " + mSubject);
+        Log.e("Citcon", "body: " + mBody);
+        Log.e("Citcon", "amount: " + mAmount);
+        Log.e("Citcon", "currency: " + (TextUtils.isEmpty(mTransCurrency) ? mCurrency : mTransCurrency));
+        Log.e("Citcon", "ipn_url: " + mIpnUrl);
+        Log.e("Citcon", "callback_url: " + mCallbackUrl);
+        Log.e("Citcon", "allow_duplicates: " + (mAllowDuplicate ? "yes" : "no"));
+        Log.e("Citcon", "vendor: " + mVendor);
+
         return returned;
     }
 }

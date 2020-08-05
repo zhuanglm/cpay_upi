@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import citcon.cpay.R;
 import sdk.CPaySDK;
 import sdk.CPayMode;
+import sdk.interfaces.InquireResponse;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
 import sdk.models.CPayOrder;
@@ -25,7 +27,7 @@ import sdk.models.CPayOrderResult;
 
 public class DemoActivity extends AppCompatActivity {
     private EditText mReferenceIdEditText, mSubjectEditText, mBodyEditText, mAmountEditText,
-            mCurrencyEditText, mVendorEditText, mIpnEditText, mCallbackEditText;
+            mCurrencyEditText, mVendorEditText, mIpnEditText, mCallbackEditText, mTransCurrency;
     private Switch mSwitch;
     private TextView mResultTextView;
     private ScrollView mScrollView;
@@ -57,10 +59,14 @@ public class DemoActivity extends AppCompatActivity {
         } else {
             REF_ID = "CNY-mobile-test";
             // AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
-            AUTH_TOKEN = "CNYE0CF6A0FE479A891BF45706A690AF";
+            AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
             CALLBACK_URL = "http://52.87.248.227/ipn.php";
             CURRENCY = "CNY";
         }
+
+//        AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
+
+//        AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
 
 
         ActivityCompat.requestPermissions(this,
@@ -78,6 +84,7 @@ public class DemoActivity extends AppCompatActivity {
         mSwitch = (Switch) findViewById(R.id.duplicate_switch);
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
+        mTransCurrency = (EditText)findViewById(R.id.trans_currency_editText);
 
         mReferenceIdEditText.setText(REF_ID); //Citcon Referance ID
         mSubjectEditText.setText("Test"); // order subject
@@ -88,10 +95,91 @@ public class DemoActivity extends AppCompatActivity {
         mIpnEditText.setText(CALLBACK_URL); //citcon payment callback url
         mCallbackEditText.setText("http://www.google.com"); // custom callback url to customization processing
 
+        Button inquireButton = (Button) findViewById(R.id.inquire_button);
+        inquireButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                if (mVendorEditText.getText().toString().equals("alipay")) {
+//                    CPaySDK.setMode(CPayMode.UAT);
+//                } else {
+//                    CPaySDK.setMode(CPayMode.DEV);
+//                }
+                CPaySDK.setMode(CPayMode.UAT);
+
+                if (mCurrencyEditText.getText().toString().equals("USD")) {
+                    AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+                } else {
+                    AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
+                }
+                CPaySDK.getInstance().mToken = AUTH_TOKEN;
+
+                CPayOrderResult orderResult = new CPayOrderResult();
+                orderResult.mOrderId = "D0000076253-e176f2c6557dd0317590";
+                orderResult.mTransCurrency = mTransCurrency.getText().toString();
+
+                CPaySDK.getInstance().inquireOrder(orderResult, new InquireResponse<CPayInquireResult>() {
+                    @Override
+                    public void gotInquireResult(CPayInquireResult object) {
+                        Log.e("Citcon", "get oder result");
+                        if (object != null) {
+                            String inquireResultStr = "ORDER RESULT:";
+                            if (object.mId != null) {
+                                inquireResultStr += "ORDER ID: " + object.mId + "\n";
+                            }
+                            if (object.mType != null) {
+                                inquireResultStr += "TYPE: " + object.mType + "\n";
+                            }
+                            if (object.mAmount != null) {
+                                inquireResultStr += "AMOUNT: " + object.mAmount + "\n";
+                            }
+                            if (object.mTime != null) {
+                                inquireResultStr += "TIME: " + object.mTime + "\n";
+                            }
+                            if (object.mReference != null) {
+                                inquireResultStr += "REFERENCE: " + object.mReference + "\n";
+                            }
+                            if (object.mStatus != null) {
+                                inquireResultStr += "STATUS: " + object.mStatus + "\n";
+                            }
+                            if (object.mCurrency != null) {
+                                inquireResultStr += "CURRENCY: " + object.mCurrency + "\n";
+                            }
+                            if (object.mNote != null) {
+                                inquireResultStr += "NOTE: " + object.mNote + "\n";
+                            }
+
+                            mResultTextView.setText(inquireResultStr);
+
+                            mScrollView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
         Button requestButton = (Button) findViewById(R.id.request_button);
         requestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /*if (mVendorEditText.getText().toString().equals("alipay")) {
+                    CPaySDK.setMode(CPayMode.UAT);
+                } else {
+                    CPaySDK.setMode(CPayMode.DEV);
+                }*/
+                CPaySDK.setMode(CPayMode.UAT);
+
+                if (mCurrencyEditText.getText().toString().equals("USD")) {
+                    AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+                } else {
+                    AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
+                }
+                CPaySDK.getInstance().mToken = AUTH_TOKEN;
+
                 CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
                         mSubjectEditText.getText().toString(),
                         mBodyEditText.getText().toString(),
@@ -100,13 +188,47 @@ public class DemoActivity extends AppCompatActivity {
                         mVendorEditText.getText().toString(),
                         mIpnEditText.getText().toString(),
                         mCallbackEditText.getText().toString(),
-                        mSwitch.isChecked());
+                        mSwitch.isChecked(),
+                        mTransCurrency.getText().toString());
+
+                Log.e("Citcon", "currency from editbox: " + mCurrencyEditText.getText().toString());
 
                 CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>() {
                     @Override
                     public void gotOrderResult(final CPayOrderResult orderResult) {
+                        Log.e("Citcon", "On gotOrderResult");
                         if (orderResult != null) {
+                            StringBuilder sb = new StringBuilder("ORDER RESULT\n\n");
+                            if (orderResult.mOrderId != null) {
+                                sb.append("ORDER ID: " + orderResult.mOrderId + "\n");
+                            }
+                            if (orderResult.mStatus != null) {
+                                sb.append("STATUS: " + orderResult.mStatus + "\n");
+                            }
+                            if (orderResult.mCurrency != null) {
+                                sb.append("CURRENCY: " + orderResult.mCurrency + "\n");
+                            }
+                            if (orderResult.mMessage != null) {
+                                sb.append("MESSAGE: " + orderResult.mMessage + "\n");
+                            }
+                            if (orderResult.mRedirectUrl != null) {
+                                sb.append("REDIRECT URL: " + orderResult.mRedirectUrl + "\n");
+                            }
+                            if (orderResult.mOrderSpec != null) {
+                                sb.append("ORDER SPEC: " + orderResult.mOrderSpec + "\n");
+                            }
+                            if (orderResult.mSignedString != null) {
+                                sb.append("SIGNED STRING: " + orderResult.mSignedString + "\n");
+                            }
 
+                            mResultTextView.setText(sb.toString());
+
+                            mScrollView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+                                }
+                            });
                         }
                     }
                 });
@@ -122,7 +244,10 @@ public class DemoActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 CPayInquireResult response = (CPayInquireResult) intent.getSerializableExtra("inquire_result");
-                String emerging = "";
+                if (response == null) {
+                    return;
+                }
+                String emerging = mResultTextView.getText().toString() + "\n\n\n";
                 emerging += "CHECK RESULT:\n\n";
                 if (response.mId != null) {
                     emerging += "ORDER ID: " + response.mId + "\n";
@@ -173,11 +298,21 @@ public class DemoActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         CPaySDK.getInstance(DemoActivity.this, AUTH_TOKEN).onResume();
-        if (testUSD) {
-            CPaySDK.setMode(CPayMode.DEV);
-        } else {
-            CPaySDK.setMode(CPayMode.PROD);
-        }
+//        if (testUSD) {
+//            CPaySDK.setMode(CPayMode.DEV);
+            // CPaySDK.setMode(CPayMode.UAT);
+//        } else {
+//            CPaySDK.setMode(CPayMode.PROD);
+//        }
+//        CPaySDK.setMode(CPayMode.DEV);
+//        CPaySDK.setMode(CPayMode.UAT);
+
+//        if (mVendorEditText.getText().toString().equals("alipay")) {
+//            CPaySDK.setMode(CPayMode.UAT);
+//        } else {
+//            CPaySDK.setMode(CPayMode.DEV);
+//        }
+
         registerInquireReceiver();
     }
 

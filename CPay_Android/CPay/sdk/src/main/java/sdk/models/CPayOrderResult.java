@@ -14,6 +14,7 @@ public class CPayOrderResult
     public String mStatus = "4000";
     public String mMessage = "unknown";
     public String mCurrency = "USD";
+    public String mTransCurrency;
     public CPayOrderResult()
     {
 

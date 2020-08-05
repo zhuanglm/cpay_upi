@@ -7,6 +7,7 @@ android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
     defaultConfig {
+//        applicationId "com.citconpay.mdemo"
         applicationId "citcon.cpay"
         minSdkVersion 15
         targetSdkVersion 27
@@ -18,7 +19,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
-    File keystore = rootProject.file("/Users/nelson/Documents/android_pos.jks")
+    File keystore = rootProject.file("/Users/citcon-lz/Citcon.work/keystore.about/android_pos.jks")
 
     signingConfigs {
         release {
@@ -29,6 +30,18 @@ android {
         }
 
     }
+
+//    File keystore = rootProject.file("/Users/citcon-lz/Citcon.work/keystore.about/citcon_apicloud.keystore")
+//
+//    signingConfigs {
+//        release {
+//            storeFile keystore
+//            storePassword "citcon"
+//            keyAlias "citcon_apicloud"
+//            keyPassword "citcon"
+//        }
+//
+//    }
 
     buildTypes {
         release {

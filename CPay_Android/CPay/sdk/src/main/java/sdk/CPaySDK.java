@@ -8,9 +8,11 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.alipay.sdk.app.PayTask;
+import com.android.volley.RequestQueue;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
@@ -92,6 +94,11 @@ public class CPaySDK {
 
     public void requestOrder(CPayOrder order, final OrderResponse<CPayOrderResult> listener) {
         mOrderListener = listener;
+
+        if (TextUtils.isEmpty(order.getmCurrency())) {
+            CPaySDK.getInstance().gotOrder(null);
+            return;
+        }
         mApiManager.requestOrder(order);
     }
 
@@ -119,6 +126,7 @@ public class CPaySDK {
         // check pay
         if (mOrderListener != null && mOrderResult != null && mOrderResult.mRedirectUrl != null && allowQuery) {
             inquireOrderInternally();
+//            delayInnerInquire();
             mOrderListener.gotOrderResult(mOrderResult);
             mOrderListener = null;
             allowQuery = false;
@@ -126,6 +134,7 @@ public class CPaySDK {
     }
 
     private String getAlipayOrderInfo() {
+//        if (mOrderResult.mCurrency.equals("CNY")) {
         if (mOrderResult.mCurrency.equals("CNY")) {
             return mOrderResult.mOrderSpec + "&sign=" + mOrderResult.mSignedString;
         } else {
@@ -154,6 +163,8 @@ public class CPaySDK {
     private void payByAlipay() {
         final String orderInfo = getAlipayOrderInfo();
 
+        Log.e("Citcon", "orderInfo: " + orderInfo);
+
         Runnable payRunnable = new Runnable() {
             @Override
             public void run() {
@@ -180,8 +191,8 @@ public class CPaySDK {
             e.printStackTrace();
         }
 
-        allowQuery = false;
-        inquireOrderInternally();
+        allowQuery = true;
+        // inquireOrderInternally();
         if (mOrderListener != null) {
             mOrderListener.gotOrderResult(mOrderResult);
         }
@@ -211,8 +222,8 @@ public class CPaySDK {
             ex.printStackTrace();
         }
 
-        allowQuery = false;
-        inquireOrderInternally();
+        allowQuery = true;
+        // inquireOrderInternally();
         if(mOrderListener != null){
             mOrderListener.gotOrderResult(mOrderResult);
         }
@@ -230,6 +241,18 @@ public class CPaySDK {
             return true;
         }
     });
+
+    private void delayInnerInquire() {
+        Log.e("CPaySDK", "delay inquire " + System.currentTimeMillis());
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("CPaySDK", "automatically inquire ..." + System.currentTimeMillis());
+                inquireOrderInternally();
+            }
+        }, 1000);
+    }
+
 
 
     private void inquireOrderInternally() {
@@ -289,15 +312,16 @@ public class CPaySDK {
         }
     }
 
-    public void gotWX(WXPayorder result, String mCurrency) {
+    public void gotWX(WXPayorder result, CPayOrder order) {
         if (result != null) {
             mOrderResult = new CPayOrderResult();
-            mOrderResult.mCurrency = mCurrency;
+            mOrderResult.mCurrency = order.getmCurrency();
             mOrderResult.mOrder = new CPayOrder();
             mOrderResult.mOrderId = result.extData;
             mOrderResult.mOrder.setmVendor("wechatpay");
-            mOrderResult.mOrder.setmCurrency(mCurrency);
+            mOrderResult.mOrder.setmCurrency(order.getmCurrency());
             mOrderResult.mRedirectUrl = "";
+            mOrderResult.mTransCurrency = order.getmTransCurrency();
 
             PayReq req = new PayReq();
             req.appId = result.appid;
@@ -328,9 +352,9 @@ public class CPaySDK {
 
     public void onWXPaySuccess(String orderId) {
         if (orderId.equals(mOrderResult.mOrderId)) {
-            allowQuery = false;
+            allowQuery = true;
 
-            inquireOrderInternally();
+            // inquireOrderInternally();
             if(mOrderListener != null){
                 mOrderResult.mStatus = "0"; // Unified the success status
                 mOrderResult.mMessage = "Success";
@@ -341,9 +365,9 @@ public class CPaySDK {
 
     public void onWXPayFailed(String orderId, int respCode, String errMsg) {
         if (orderId.equals(mOrderResult.mOrderId)) {
-            allowQuery = false;
+            allowQuery = true;
 
-            inquireOrderInternally();
+            // inquireOrderInternally();
             if(mOrderListener != null){
                 mOrderResult.mStatus = Integer.toString(respCode);
                 mOrderResult.mMessage = errMsg;

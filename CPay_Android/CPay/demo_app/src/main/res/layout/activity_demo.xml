@@ -229,9 +229,41 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp" />
 
+    <TextView
+        android:id="@+id/trans_currency_textView"
+        android:layout_below="@id/callback_editText"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:textSize="14sp"
+        android:text="@string/trans_currency" />
+    <EditText
+        android:id="@+id/trans_currency_editText"
+        android:layout_below="@id/trans_currency_textView"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="25dp"
+        android:textSize="14sp"
+        android:inputType="textNoSuggestions"
+        android:background="@drawable/rect"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
+
+    <Button
+        android:id="@+id/inquire_button"
+        android:layout_below="@+id/trans_currency_textView"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:text="@string/inquire_order"/>
+
     <Button
         android:id="@+id/request_button"
-        android:layout_below="@+id/callback_editText"
+        android:layout_below="@+id/inquire_button"
         android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
         android:layout_width="160dp"
