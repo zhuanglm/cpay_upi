@@ -93,18 +93,6 @@ public class CPayOrder
         returned.put("allow_duplicates", mAllowDuplicate ? "yes" : "no");
         returned.put("vendor", mVendor);
 
-        // TODO: test
-        Log.e("Citcon", "Request PayLoad");
-        Log.e("Citcon", "reference: " + mReferenceId);
-        Log.e("Citcon", "subject: " + mSubject);
-        Log.e("Citcon", "body: " + mBody);
-        Log.e("Citcon", "amount: " + mAmount);
-        Log.e("Citcon", "currency: " + (TextUtils.isEmpty(mTransCurrency) ? mCurrency : mTransCurrency));
-        Log.e("Citcon", "ipn_url: " + mIpnUrl);
-        Log.e("Citcon", "callback_url: " + mCallbackUrl);
-        Log.e("Citcon", "allow_duplicates: " + (mAllowDuplicate ? "yes" : "no"));
-        Log.e("Citcon", "vendor: " + mVendor);
-
         return returned;
     }
 }

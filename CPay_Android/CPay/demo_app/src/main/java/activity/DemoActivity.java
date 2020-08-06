@@ -104,10 +104,11 @@ public class DemoActivity extends AppCompatActivity {
 //                } else {
 //                    CPaySDK.setMode(CPayMode.DEV);
 //                }
-                CPaySDK.setMode(CPayMode.UAT);
+                CPaySDK.setMode(CPayMode.PROD);
 
                 if (mCurrencyEditText.getText().toString().equals("USD")) {
-                    AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+//                    AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+                    AUTH_TOKEN = "1349225E81B44F3E87133C3FFDF4CAE4";
                 } else {
                     AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
                 }
@@ -171,10 +172,11 @@ public class DemoActivity extends AppCompatActivity {
                 } else {
                     CPaySDK.setMode(CPayMode.DEV);
                 }*/
-                CPaySDK.setMode(CPayMode.UAT);
+                CPaySDK.setMode(CPayMode.PROD);
 
                 if (mCurrencyEditText.getText().toString().equals("USD")) {
-                    AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+//                    AUTH_TOKEN = "9FBBA96E77D747659901CCBF787CDCF1";
+                    AUTH_TOKEN = "1349225E81B44F3E87133C3FFDF4CAE4";
                 } else {
                     AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
                 }

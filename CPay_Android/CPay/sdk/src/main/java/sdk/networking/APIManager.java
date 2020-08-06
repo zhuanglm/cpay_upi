@@ -47,6 +47,7 @@ public class APIManager
         String url = CPaySDK.getBaseURL(order.getmCurrency()) + "payment/pay_app";
 
         Log.e("Citcon", "Request URL: " + url);
+        Log.e("Citcon", "Token: " + CPaySDK.getInstance().mToken);
 
         int method = Request.Method.POST;
         CPayOrderRequest request = new CPayOrderRequest(method, url, order.toPayload(),
@@ -66,17 +67,6 @@ public class APIManager
                             result.sign = response.optString("sign");
                             result.extData = response.optString("order_id");
 
-                            // TODO: log
-                            Log.e("Citcon", "WechatPay Response");
-                            Log.e("Citcon", "appid: " + result.appid);
-                            Log.e("Citcon", "partnerid: " + result.partnerid);
-                            Log.e("Citcon", "mPackage: " + result.mPackage);
-                            Log.e("Citcon", "noncestr: " + result.noncestr);
-                            Log.e("Citcon", "timestamp: " + result.timestamp);
-                            Log.e("Citcon", "prepayid: " + result.prepayid);
-                            Log.e("Citcon", "sign: " + result.sign);
-                            Log.e("Citcon", "extData: " + result.extData);
-
                             CPaySDK.setWXAppId(result.appid);
                             CPaySDK.getInstance().gotWX(result, order);
 
@@ -89,16 +79,6 @@ public class APIManager
                             result.mCurrency = order.getmCurrency();
                             result.mTransCurrency = order.getmTransCurrency();
                             result.mOrder = order;
-
-                            // TODO: log
-                            Log.e("Citcon", "Alipay Response");
-                            Log.e("Citcon", "mRedirectUrl: " + result.mRedirectUrl);
-                            Log.e("Citcon", "mOrderId: " + result.mOrderId);
-                            Log.e("Citcon", "mSignedString: " + result.mSignedString);
-                            Log.e("Citcon", "mOrderSpec: " + result.mOrderSpec);
-                            Log.e("Citcon", "mCurrency: " + result.mCurrency);
-                            Log.e("Citcon", "mTransCurrency: " + result.mTransCurrency);
-                            Log.e("Citcon", "mOrder: " + result.mOrder);
 
                             CPaySDK.getInstance().gotOrder(result);
                         }
