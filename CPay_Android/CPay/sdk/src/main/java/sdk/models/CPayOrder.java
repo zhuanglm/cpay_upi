@@ -47,6 +47,20 @@ public class CPayOrder
     }
 
     public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
+                     boolean allowDuplicate) {
+        mReferenceId = referenceId;
+        mAmount = amount;
+        mCurrency = currency;
+        mVendor = vendor;
+        mSubject = subject;
+        mBody = body;
+        mIpnUrl = ipnUrl;
+        mCallbackUrl = callbackUrl;
+        mAllowDuplicate = allowDuplicate;
+        mTransCurrency = null;
+    }
+
+    public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
                      boolean allowDuplicate
             , String transCurrency)
     {
