@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CPay.iml" filepath="$PROJECT_DIR$/CPay.iml" />
-      <module fileurl="file://$PROJECT_DIR$/demo_app/demo_app.iml" filepath="$PROJECT_DIR$/demo_app/demo_app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sdk/sdk.iml" filepath="$PROJECT_DIR$/sdk/sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CPay.iml" filepath="$PROJECT_DIR$/.idea/modules/CPay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo_app/CPay.demo_app.iml" filepath="$PROJECT_DIR$/.idea/modules/demo_app/CPay.demo_app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sdk/CPay.sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/sdk/CPay.sdk.iml" />
     </modules>
   </component>
 </project>

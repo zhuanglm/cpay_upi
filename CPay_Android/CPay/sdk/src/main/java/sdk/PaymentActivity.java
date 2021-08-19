@@ -18,8 +18,6 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
 
     private IWXAPI api;
 
-    private String orderID;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,30 +43,26 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
     @Override
     public void onResp(BaseResp resp) {
         Log.d(TAG, "onPayFinish, errCode = " + resp.errCode);
-        String errMsg = null;
-        if(resp.errCode == 0){
-            // success
-            checkPaymentResult();
-            return;
-        }else if(resp.errCode == -1){
-            // Toast.makeText(this, "Error code:" + resp.errCode + " sign error", Toast.LENGTH_LONG).show();
-            errMsg = "sign error";
-        }else if(resp.errCode == -2){
-            // Toast.makeText(this, "Error code:" + resp.errCode + " user cancel", Toast.LENGTH_LONG).show();
-            errMsg = "user cancel";
-        }else {
-            // Toast.makeText(this, "Error code:" + resp.errCode + " other error", Toast.LENGTH_LONG).show();
-            errMsg = "other error";
+        final String errMsg;
+        final String orderID = getIntent().getStringExtra("_wxapi_payresp_extdata");
+
+        switch (resp.errCode){
+            case 0:
+                // success
+                CPaySDK.getInstance().onWXPaySuccess(orderID);
+                finish();
+            case -1:
+                errMsg = "sign error";
+                break;
+            case -2:
+                errMsg = "user cancel";
+                break;
+            default:
+                errMsg = "other error";
         }
-        orderID = getIntent().getStringExtra("_wxapi_payresp_extdata");
+
         CPaySDK.getInstance().onWXPayFailed(orderID, resp.errCode, errMsg);
         finish();
-    }
 
-
-    private void checkPaymentResult(){
-        orderID = getIntent().getStringExtra("_wxapi_payresp_extdata");
-        CPaySDK.getInstance().onWXPaySuccess(orderID);
-        finish();
     }
 }

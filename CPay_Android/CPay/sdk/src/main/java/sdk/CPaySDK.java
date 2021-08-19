@@ -1,5 +1,7 @@
 package sdk;
 
+import static sdk.CPayMode.*;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,15 +9,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.alipay.sdk.app.PayTask;
-import com.android.volley.RequestQueue;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+import com.unionpay.UPPayAssistEx;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,29 +29,27 @@ import sdk.models.CPayOrder;
 import sdk.models.CPayOrderResult;
 import sdk.models.WXPayorder;
 import sdk.networking.APIManager;
-import sdk.networking.CPayEnv;
 
 /**
  * Created by alexandrudiaconu on 7/20/17.
  */
 
 public class CPaySDK {
+    private static final String TAG = "CPaySDK";
     private static CPaySDK sInstance;
-    private final IWXAPI api;
-    private APIManager mApiManager;
+    private final APIManager mApiManager;
     private OrderResponse<CPayOrderResult> mOrderListener;
     private InquireResponse<CPayInquireResult> mInquireListener;
     public String mToken;
     private Activity mActivity;
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
-    private CPayMode env = CPayMode.PROD;
+    private CPayMode env = PROD;
     private boolean allowQuery = false;
-    private LocalBroadcastManager localBroadcastManager;
+    private final LocalBroadcastManager localBroadcastManager;
 
     private CPaySDK(Context context) {
         mApiManager = APIManager.getInstance(context);
-        api = WXAPIFactory.createWXAPI(context, mWXAppId);
         localBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
@@ -59,7 +59,7 @@ public class CPaySDK {
     }
 
     public static String getWXAppId() {
-        if(sInstance ==  null){
+        if (sInstance == null) {
             return null;
         }
         return sInstance.mWXAppId;
@@ -69,8 +69,23 @@ public class CPaySDK {
         sInstance.env = env;
     }
 
+    public static void setMode(String envString) {
+        switch (envString){
+            case "DEV":
+                setMode(CPayMode.DEV);
+                break;
+            case "UAT":
+                setMode(CPayMode.UAT);
+                break;
+            default:
+                setMode(CPayMode.PROD);
+                break;
+        }
+    }
+
+
     public static CPayMode getMode() {
-        return sInstance == null ? CPayMode.PROD : sInstance.env;
+        return sInstance == null ? PROD : sInstance.env;
     }
 
 
@@ -79,8 +94,16 @@ public class CPaySDK {
             sInstance = new CPaySDK(activity);
 
         sInstance.mActivity = activity;
-        sInstance.mToken = token;
+        if(token != null){
+            sInstance.mToken = token;
+        }
         return sInstance;
+    }
+
+    public static void setToken(String token){
+        if (sInstance != null){
+            sInstance.mToken = token;
+        }
     }
 
 
@@ -94,11 +117,6 @@ public class CPaySDK {
 
     public void requestOrder(CPayOrder order, final OrderResponse<CPayOrderResult> listener) {
         mOrderListener = listener;
-
-        if (TextUtils.isEmpty(order.getmCurrency())) {
-            CPaySDK.getInstance().gotOrder(null);
-            return;
-        }
         mApiManager.requestOrder(order);
     }
 
@@ -110,149 +128,74 @@ public class CPaySDK {
 
     @SuppressWarnings("deprecation")
     public void gotOrder(CPayOrderResult orderResult) {
-        if (orderResult != null) {
-            mOrderResult = orderResult;
-            payByAlipay();
-        } else {
+        if (orderResult == null) {
             mOrderListener.gotOrderResult(null);
+            return;
         }
+        gotAlipay(orderResult);
     }
 
     public void inquiredOrder(CPayInquireResult inquireResult) {
         mInquireListener.gotInquireResult(inquireResult);
     }
 
-    public void onResume() {
-        // check pay
-        if (mOrderListener != null && mOrderResult != null && mOrderResult.mRedirectUrl != null && allowQuery) {
-            inquireOrderInternally();
-//            delayInnerInquire();
-            mOrderListener.gotOrderResult(mOrderResult);
-            mOrderListener = null;
-            allowQuery = false;
-        }
-    }
-
-    private String getAlipayOrderInfo() {
-//        if (mOrderResult.mCurrency.equals("CNY")) {
-        if (mOrderResult.mCurrency.equals("CNY")) {
-            return mOrderResult.mOrderSpec + "&sign=" + mOrderResult.mSignedString;
-        } else {
-            return mOrderResult.mOrderSpec + "&sign=\"" + mOrderResult.mSignedString + "\"&sign_type=\"RSA\"";
-        }
-    }
-
-    private void alipayCNY(String orderInfo) {
-        PayTask alipay = new PayTask(mActivity);
-        Map<String, String> result = alipay.payV2(orderInfo, true);
-
-        Message msg = new Message();
-        msg.obj = result;
-        mHandler.sendMessage(msg);
-    }
-
-    private void alipayUSD(String orderInfo) {
-        PayTask alipay = new PayTask(mActivity);
-        String result = alipay.pay(orderInfo, true);
-
-        Message msg = new Message();
-        msg.obj = result;
-        mHandler.sendMessage(msg);
-    }
-
-    private void payByAlipay() {
-        final String orderInfo = getAlipayOrderInfo();
-
-        Log.e("Citcon", "orderInfo: " + orderInfo);
-
-        Runnable payRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (mOrderResult.mCurrency.equals("CNY")) {
-                    alipayCNY(orderInfo);
-                } else {
-                    alipayUSD(orderInfo);
-                }
-            }
-        };
-        Thread payThread = new Thread(payRunnable);
-        payThread.start();
-    }
-
-    private void handleAlipayCNYResult(Message msg) {
-        try {
-            HashMap<String, String> result = (HashMap<String, String>) msg.obj;
-            if (mOrderResult != null) {
-                mOrderResult.mStatus = result.get("resultStatus");
-                mOrderResult.mStatus = "9000".equals(mOrderResult.mStatus) ? "0" : mOrderResult.mStatus; // Unified the success status
-                mOrderResult.mMessage = result.get("memo");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        allowQuery = true;
-        // inquireOrderInternally();
-        if (mOrderListener != null) {
-            mOrderListener.gotOrderResult(mOrderResult);
-        }
-    }
-
-    private void handleAlipayUSDResult(Message msg) {
-        try {
-            String result = (String) msg.obj;
-            String[] kvp = result.split(";");
-            for (String kv : kvp) {
-                String[] entry = kv.split("=");
-                String key = entry[0];
-                if (key.equals("resultStatus")) {
-                    String value = entry[1].replace("{", "").replace("}", "");
-                    if (mOrderResult != null) {
-                        mOrderResult.mStatus = value;
-                        mOrderResult.mStatus = "9000".equals(mOrderResult.mStatus) ? "0" : mOrderResult.mStatus; // Unified the success status
-                    }
-                } else if (key.equals("memo")) {
-                    String value = entry[1].replace("{", "").replace("}", "");
-                    if (mOrderResult != null) {
-                        mOrderResult.mMessage = value;
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        allowQuery = true;
-        // inquireOrderInternally();
-        if(mOrderListener != null){
-            mOrderListener.gotOrderResult(mOrderResult);
-        }
-    }
 
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             allowQuery = true;
             if (msg.obj instanceof String) {
-                handleAlipayUSDResult(msg);
+                // USD
+                try {
+                    String result = (String) msg.obj;
+                    String[] kvp = result.split(";");
+                    for (String kv : kvp) {
+                        String[] entry = kv.split("=");
+                        String key = entry[0];
+                        if (key.equals("resultStatus")) {
+                            String value = entry[1].replace("{", "").replace("}", "");
+                            if (mOrderResult != null) {
+                                mOrderResult.mStatus = value;
+                                mOrderResult.mStatus = "9000".equals(mOrderResult.mStatus) ? "0" : mOrderResult.mStatus; // Unified the success status
+                            }
+                        } else if (key.equals("memo")) {
+                            String value = entry[1].replace("{", "").replace("}", "");
+                            if (mOrderResult != null) {
+                                mOrderResult.mMessage = value;
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             } else if (msg.obj instanceof HashMap) {
-                handleAlipayCNYResult(msg);
+                // RMB
+                try {
+                    HashMap<String, String> result = (HashMap<String, String>) msg.obj;
+                    if (mOrderResult != null) {
+                        mOrderResult.mStatus = result.get("resultStatus");
+                        mOrderResult.mStatus = "9000".equals(mOrderResult.mStatus) ? "0" : mOrderResult.mStatus; // Unified the success status
+                        mOrderResult.mMessage = result.get("memo");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+                // other
+                return false;
             }
+
+            allowQuery = false;
+            inquireOrderInternally();
+
+            if (mOrderListener != null) {
+                mOrderListener.gotOrderResult(mOrderResult);
+            }
+
             return true;
         }
     });
-
-    private void delayInnerInquire() {
-        Log.e("CPaySDK", "delay inquire " + System.currentTimeMillis());
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.e("CPaySDK", "automatically inquire ..." + System.currentTimeMillis());
-                inquireOrderInternally();
-            }
-        }, 1000);
-    }
-
 
 
     private void inquireOrderInternally() {
@@ -312,63 +255,109 @@ public class CPaySDK {
         }
     }
 
-    public void gotWX(WXPayorder result, CPayOrder order) {
-        if (result != null) {
-            mOrderResult = new CPayOrderResult();
-            mOrderResult.mCurrency = order.getmCurrency();
-            mOrderResult.mOrder = new CPayOrder();
-            mOrderResult.mOrderId = result.extData;
-            mOrderResult.mOrder.setmVendor("wechatpay");
-            mOrderResult.mOrder.setmCurrency(order.getmCurrency());
-            mOrderResult.mRedirectUrl = "";
-            mOrderResult.mTransCurrency = order.getmTransCurrency();
+    public void gotAlipay(CPayOrderResult orderResult) {
+        mOrderResult = orderResult;
 
-            PayReq req = new PayReq();
-            req.appId = result.appid;
-            req.partnerId = result.partnerid;
-            req.prepayId = result.prepayid;
-            req.nonceStr = result.noncestr;
-            req.timeStamp = result.timestamp;
-            req.packageValue = result.mPackage;
-            req.sign = result.sign;
-            req.extData = result.extData;
-
-            boolean argsCheck = req.checkArgs();
-            boolean callWxRet = api.sendReq(req);
-            Log.d("jim", "check args " + argsCheck);
-            Log.d("jim", "send return :" + callWxRet);
-
-            if (!callWxRet) {
-                mOrderResult.mStatus = "-2";
-                mOrderResult.mMessage = "WeChat is not installed on the device";
-                mOrderListener.gotOrderResult(mOrderResult);
-            } else {
-                allowQuery = true;
-            }
+        final String orderInfo;
+        if (mOrderResult.mCurrency.equals("CNY")) {
+            orderInfo = mOrderResult.mOrderSpec + "&sign=" + mOrderResult.mSignedString;
         } else {
-            mOrderListener.gotOrderResult(null);
+            orderInfo = mOrderResult.mOrderSpec + "&sign=\"" + mOrderResult.mSignedString + "\"&sign_type=\"RSA\"";
         }
+
+        Runnable payRunnable = new Runnable() {
+            @Override
+            public void run() {
+                PayTask alipay = new PayTask(mActivity);
+
+                if (mOrderResult.mCurrency.equals("CNY")) {
+                    Map<String, String> result = alipay.payV2(orderInfo, true);
+                    Message msg = new Message();
+                    msg.obj = result;
+                    mHandler.sendMessage(msg);
+                } else {
+                    Log.e(TAG, orderInfo);
+                    String result = alipay.pay(orderInfo, true);
+                    Message msg = new Message();
+                    msg.obj = result;
+                    mHandler.sendMessage(msg);
+                }
+            }
+        };
+        Thread payThread = new Thread(payRunnable);
+        payThread.start();
+    }
+
+    public void gotUnionPay(CPayOrderResult result) {
+        String tn = result.mSignedString;
+        UPPayAssistEx.startPay(mApiManager.context, null, null, tn,  env == DEV ? "01": "00");
+    }
+
+    public void gotWX(WXPayorder result, String mCurrency) {
+
+        mOrderResult = new CPayOrderResult();
+        mOrderResult.mCurrency = mCurrency;
+        mOrderResult.mOrder = new CPayOrder();
+        mOrderResult.mOrderId = result.extData;
+        mOrderResult.mOrder.setmVendor("wechatpay");
+        mOrderResult.mOrder.setmCurrency(mCurrency);
+        mOrderResult.mRedirectUrl = "";
+
+        PayReq req = new PayReq();
+        req.appId = result.appid;
+        req.partnerId = result.partnerid;
+        req.prepayId = result.prepayid;
+        req.nonceStr = result.noncestr;
+        req.timeStamp = result.timestamp;
+        req.packageValue = result.mPackage;
+        req.sign = result.sign;
+        req.extData = result.extData;
+
+        boolean argsCheck = req.checkArgs();
+
+        setWXAppId(result.appid);
+        IWXAPI api = WXAPIFactory.createWXAPI(mActivity, result.appid);
+
+        boolean callWxRet = api.sendReq(req);
+        Log.d("jim", "check args " + argsCheck);
+        Log.d("jim", "send return :" + callWxRet);
+
+        if (callWxRet) {
+            // success invoke wechat app
+            allowQuery = true;
+        } else {
+            // failed
+            mOrderResult.mStatus = "-2";
+            mOrderResult.mMessage = "WeChat is not installed on the device";
+            mOrderListener.gotOrderResult(mOrderResult);
+        }
+
     }
 
     public void onWXPaySuccess(String orderId) {
-        if (orderId.equals(mOrderResult.mOrderId)) {
-            allowQuery = true;
-
-            // inquireOrderInternally();
-            if(mOrderListener != null){
-                mOrderResult.mStatus = "0"; // Unified the success status
-                mOrderResult.mMessage = "Success";
-                mOrderListener.gotOrderResult(mOrderResult);
-            }
+        if (!orderId.equals(mOrderResult.mOrderId)) {
+            return;
         }
+
+        allowQuery = false;
+        inquireOrderInternally();
+
+        if (mOrderListener == null) {
+            return;
+        }
+
+        // client success callback
+        mOrderResult.mStatus = "0"; // Unified the success status
+        mOrderResult.mMessage = "Success";
+        mOrderListener.gotOrderResult(mOrderResult);
     }
 
     public void onWXPayFailed(String orderId, int respCode, String errMsg) {
         if (orderId.equals(mOrderResult.mOrderId)) {
-            allowQuery = true;
+            allowQuery = false;
 
-            // inquireOrderInternally();
-            if(mOrderListener != null){
+            inquireOrderInternally();
+            if (mOrderListener != null) {
                 mOrderResult.mStatus = Integer.toString(respCode);
                 mOrderResult.mMessage = errMsg;
                 mOrderListener.gotOrderResult(mOrderResult);
@@ -377,15 +366,30 @@ public class CPaySDK {
     }
 
 
-    public static String getBaseURL(String currency) {
-        CPayMode env = CPaySDK.getMode();
-        if (env.equals(CPayMode.UAT)) {
-            return currency.equals(CPayEnv.CNY) ? CPayEnv.URL_RMB_UAT : CPayEnv.URL_USD_UAT;
-        } else if (env.equals(CPayMode.DEV)) {
-            return currency.equals(CPayEnv.CNY) ? CPayEnv.URL_RMB_DEV : CPayEnv.URL_USD_DEV;
-        } else {
-            // prod
-            return currency.equals(CPayEnv.CNY) ? CPayEnv.URL_RMB_PROD : CPayEnv.URL_USD_PROD;
+
+
+    public void setupOnResumeCheck(CPayOrderResult result) {
+        // alipay_hk or unionpay 成功唤起了客户端， 准备在OnResume的地方检查支付结果
+        allowQuery = true;
+        mOrderResult = result;
+    }
+
+    public void onResume() {
+        // check pay
+        if (mOrderListener != null && mOrderResult != null && allowQuery) {
+            inquireOrderInternally();
+            mOrderListener.gotOrderResult(mOrderResult);
+            mOrderListener = null;
+            allowQuery = false;
         }
+    }
+
+
+    public void onOrderRequestError() {
+        mOrderListener.gotOrderResult(null);
+    }
+
+    public void onInquiredOrderError() {
+        mInquireListener.gotInquireResult(null);
     }
 }

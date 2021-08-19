@@ -34,3 +34,7 @@
 -keep class com.alipay.sdk.app.PayTask{ public *;}
 -keep class com.alipay.sdk.app.AuthTask{ public *;}
 -keep public class my.package.** { public *;}
+
+-dontwarn com.unionpay.**
+-keep class com.unionpay.** {*;}
+-keep class org.simalliance.openmobileapi.** {*;}

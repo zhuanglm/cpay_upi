@@ -1,0 +1,31 @@
+name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: |
+        echo "${{ secrets.RELEASE_KEYSTORE }}" > ./CPay_Android/CPay/demo_app/release.keystore.asc
+        gpg -d --passphrase "${{ secrets.RELEASE_KEYSTORE_PASSPHRASE }}" --batch ./CPay_Android/CPay/demo_app/release.keystore.asc > ./CPay_Android/CPay/demo_app/release.keystore
+        cp ./CPay_Android/CPay/demo_app/release.keystore ./CPay_Android/CPay/release.keystore
+        cd  ./CPay_Android/CPay/ 
+        ./gradlew build
+    - name : release apk
+      uses: actions/upload-artifact@master
+      with:
+        name: demo_app-release.apk
+        path: ./CPay_Android/CPay/demo_app/build/outputs/apk/release/demo_app-release.apk
+
+    - name : release aar
+      uses: actions/upload-artifact@master
+      with:
+        name: citcon-sdk-release.aar
+        path: ./CPay_Android/CPay/sdk/build/outputs/aar/citcon-sdk-release.aar

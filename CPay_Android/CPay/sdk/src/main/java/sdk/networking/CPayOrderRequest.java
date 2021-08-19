@@ -2,23 +2,21 @@ package sdk.networking;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.toolbox.HttpHeaderParser;
-import org.json.JSONException;
+
 import org.json.JSONObject;
-import java.io.UnsupportedEncodingException;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import sdk.CPaySDK;
 
 /**
  * Created by alexandrudiaconu on 7/22/17.
  */
 
-public class CPayOrderRequest extends Request<JSONObject>
-{
+public class CPayOrderRequest extends Request<JSONObject> {
     private Response.Listener<JSONObject> mListener;
     private Map<String, String> mParams;
 
@@ -29,38 +27,26 @@ public class CPayOrderRequest extends Request<JSONObject>
         this.mParams = params;
     }
 
-    protected Map<String, String> getParams()
-            throws com.android.volley.AuthFailureError
-    {
+    protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
         return mParams;
     }
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-        try {
-            String jsonString = new String(response.data,
-                    HttpHeaderParser.parseCharset(response.headers));
-            return Response.success(new JSONObject(jsonString),
-                    HttpHeaderParser.parseCacheHeaders(response));
-        } catch (UnsupportedEncodingException e) {
-            return Response.error(new ParseError(e));
-        } catch (JSONException je) {
-            return Response.error(new ParseError(je));
-        }
+        return Utils.parseResponse(response);
     }
 
     @Override
-    protected void deliverResponse(JSONObject response)
-    {
+    protected void deliverResponse(JSONObject response) {
         mListener.onResponse(response);
     }
 
     @Override
-    public Map<String, String> getHeaders() throws AuthFailureError
-    {
+    public Map<String, String> getHeaders() throws AuthFailureError {
         Map<String, String> headers = new HashMap<>();
         String auth = "Bearer " + CPaySDK.getInstance().mToken;
         headers.put("Authorization", auth);
+        headers.put("Accept-Encoding", "identity");
         return headers;
     }
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="vendors_list">
+        <item>upop</item>
+        <item>wechatpay</item>
+        <item>alipay</item>
+        <item>kakaopay</item>
+        <item>dana</item>
+        <item>alipay_hk</item>
+    </string-array>
+    <string-array name="token_list">
+        <item>52A92BB2E055434DBAC0CC4585C242B2</item>
+        <item>XYIL2W9BCQSTNN1CXUQ6WEH9JQYZ3VLM</item>
+        <item>9FBBA96E77D747659901CCBF787CDCF1</item>
+        <item>CNYAPPF6A0FE479A891BF45706A690AE</item>
+    </string-array>
+
+    <string-array name="mode_list">
+        <item>UAT</item>
+        <item>DEV</item>
+        <item>PROD</item>
+    </string-array>
+
+</resources>

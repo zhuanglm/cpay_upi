@@ -1,17 +1,16 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 30
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 27
-        versionCode 5
-        versionName "2.3.0"
+        minSdkVersion 16
+        targetSdkVersion 30
+        versionCode 6
+        versionName "2.2.0"
 
         multiDexEnabled true
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
     }
 
@@ -29,46 +28,66 @@ android {
             minifyEnabled false
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "citcon-sdk-${variant.name}.aar"
+        }
+    }
 }
 
 repositories {
     flatDir {
-        dirs 'libs'
+        dirs project(':sdk').file('libs')
     }
 }
 
-dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    testImplementation 'junit:junit:4.12'
-    implementation 'com.android.support:multidex:1.0.3'
-}
 
 def jarName = 'citcon-sdk.aar'
 
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    compileOnly 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.9'
+    compileOnly 'com.github.mastergyp:citcon-alipay:0.9.1'
+    compileOnly 'com.github.mastergyp:citcon-unionpay:1.0.0'
+}
+
+task javaHome {
+    println"JAVA_HOME:" + System.getProperty("java.home")
+}
+
 
 task clearJar(type: Delete) {
+
+
     delete "${project.buildDir}/libs/" + jarName
     delete "${project.buildDir}/libs/alipaySdk-20180601.jar"
     delete "${project.buildDir}/libs/volley.jar"
-    delete "${project.buildDir}/libs/wechat-sdk-android-without-mta-5.1.6.jar"
+
 }
 
 task makeJar(type: Copy) {
-    from("${project.buildDir}/intermediates/packaged-classes/release/")
+    from("${project.buildDir}/intermediates/aar_main_jar/release/")
     into("${project.buildDir}/libs/")
     include('classes.jar')
     rename('classes.jar', jarName)
 
-    from("${project.buildDir}/intermediates/packaged-classes/release/libs/")
+    from("${project.buildDir}/intermediates/aar_libs_directory/release/libs/")
     into("${project.buildDir}/libs/")
     include('alipaySdk-20180601.jar')
     include('volley.jar')
-    include('wechat-sdk-android-without-mta-5.1.6.jar')
-
 }
 
 task superSimpleJar(type: Jar) {
