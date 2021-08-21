@@ -34,9 +34,4 @@
             android:targetActivity="sdk.PaymentActivity" />
     </application>
 
-    <!-- For Android 11 build version >= 30  -->
-    <queries>
-        <package android:name="com.tencent.mm" />
-    </queries>
-
 </manifest>
