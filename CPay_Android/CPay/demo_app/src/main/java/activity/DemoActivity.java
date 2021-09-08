@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -19,8 +20,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import java.util.ArrayList;
+
 import citcon.cpay.R;
-import sdk.CPayMode;
 import sdk.CPaySDK;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
@@ -29,11 +31,21 @@ import sdk.models.CPayOrderResult;
 
 public class DemoActivity extends AppCompatActivity {
     private final static String TAG = "DemoActivity";
+
+        // mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
+    private final static int PRESET[][] =
+                    {{1, 0, 0, 1}, // upop dev usd
+                    {0, 0, 0, 1}, // wechatpay? uat usd
+                    {0, 0, 2, 1}, // alipay?
+                    {0, 1, 3, 100}, // kakaopay
+                    {0, 1, 5, 30000}, // dana
+                    {0, 2, 0, 1}}; //alipay hk uat hkd
+
     private EditText mReferenceIdEditText;
     private EditText mSubjectEditText;
     private EditText mBodyEditText;
     private EditText mAmountEditText;
-    private EditText mCurrencyEditText;
+    private Spinner mCurrencySpinner;
     private Spinner mVendorSpinner;
     private Spinner mModeSpinner;
     private Spinner mTokenSpinner;
@@ -85,7 +97,7 @@ public class DemoActivity extends AppCompatActivity {
         mSubjectEditText = (EditText) findViewById(R.id.subject_editText);
         mBodyEditText = (EditText) findViewById(R.id.body_editText);
         mAmountEditText = (EditText) findViewById(R.id.amount_editText);
-        mCurrencyEditText = (EditText) findViewById(R.id.currency_editText);
+        mCurrencySpinner = (Spinner) findViewById(R.id.currency_spinner);
         mVendorSpinner = (Spinner) findViewById(R.id.vendor_spinner);
         mModeSpinner = (Spinner) findViewById(R.id.mode_spinner);
         mTokenSpinner = (Spinner) findViewById(R.id.token_spinner);
@@ -98,11 +110,23 @@ public class DemoActivity extends AppCompatActivity {
         mReferenceIdEditText.setText(REF_ID); //Citcon Referance ID
         mSubjectEditText.setText("Test"); // order subject
         mBodyEditText.setText("Test data"); // order body
-        mAmountEditText.setText("1"); // amount
-        mCurrencyEditText.setText(CURRENCY); // currency USD
-        mVendorSpinner.setSelection(0); // payment vendor wechatpay or alipay
+
+
         mIpnEditText.setText(IPN_URL); //citcon payment callback url
         mCallbackEditText.setText(CALLBACK_URL); // custom callback url to customization processing
+
+        mVendorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setPreSet(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                setPreSet(0);
+            }
+        });
 
         Button requestButton = (Button) findViewById(R.id.request_button);
         requestButton.setOnClickListener(new View.OnClickListener() {
@@ -116,7 +140,7 @@ public class DemoActivity extends AppCompatActivity {
                         mSubjectEditText.getText().toString(),
                         mBodyEditText.getText().toString(),
                         mAmountEditText.getText().toString(),
-                        mCurrencyEditText.getText().toString(),
+                        mCurrencySpinner.getSelectedItem().toString(),
                         mVendorSpinner.getSelectedItem().toString(),
                         mIpnEditText.getText().toString(),
                         mCallbackEditText.getText().toString(),
@@ -154,9 +178,9 @@ public class DemoActivity extends AppCompatActivity {
                 CPayInquireResult response = (CPayInquireResult) intent.getSerializableExtra("inquire_result");
                 String emerging = "";
                 emerging += "CHECK RESULT:\n\n";
-                if(response == null){
+                if (response == null) {
                     emerging += "NULL response";
-                }else{
+                } else {
                     if (response.mId != null) {
                         emerging += "ORDER ID: " + response.mId + "\n";
                     }
@@ -193,6 +217,13 @@ public class DemoActivity extends AppCompatActivity {
                 });
             }
         };
+    }
+
+    private void setPreSet(int i) {
+        mModeSpinner.setSelection(PRESET[i][0]);
+        mTokenSpinner.setSelection(PRESET[i][1]);
+        mCurrencySpinner.setSelection(PRESET[i][2]); // currency USD
+        mAmountEditText.setText("" + PRESET[i][3]); // amount
     }
 
     /**

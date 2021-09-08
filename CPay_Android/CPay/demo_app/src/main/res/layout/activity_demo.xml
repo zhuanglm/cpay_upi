@@ -160,8 +160,8 @@
                     android:text="@string/currency"
                     android:textSize="14sp" />
 
-                <EditText
-                    android:id="@+id/currency_editText"
+                <Spinner
+                    android:id="@+id/currency_spinner"
                     android:layout_width="fill_parent"
                     android:layout_height="25dp"
                     android:layout_below="@id/currency_textView"
@@ -170,6 +170,7 @@
                     android:layout_toRightOf="@id/mid"
                     android:background="@drawable/rect"
                     android:inputType="textNoSuggestions"
+                    android:entries="@array/currency_list"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:textSize="14sp" />
