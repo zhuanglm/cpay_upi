@@ -35,7 +35,7 @@ public class DemoActivity extends AppCompatActivity {
         // mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
     private final static int PRESET[][] =
                     {{1, 0, 0, 1}, // upop dev usd
-                    {0, 0, 0, 1}, // wechatpay? uat usd
+                    {2, 3, 4, 1}, // wechatpay? prod cny
                     {0, 0, 2, 1}, // alipay?
                     {0, 1, 3, 100}, // kakaopay
                     {0, 1, 5, 30000}, // dana
