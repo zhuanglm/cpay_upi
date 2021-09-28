@@ -16,7 +16,7 @@ public class CPayEnv {
 
     // api type
     public static final String ORDER_PATH = "payment/pay_app";
-    public static final String AMS_ORDER_PATH = "payment3/pay_app";
+    public static final String AMS_ORDER_PATH = "payment/pay_app";
     public static final String INQUIRE_PATH = "payment/inquire";
 
     private static final String URL_USD_DEV = "https://dev.citconpay.com/";
