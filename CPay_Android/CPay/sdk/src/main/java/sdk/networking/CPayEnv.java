@@ -29,14 +29,14 @@ public class CPayEnv {
     private static final String URL_RMB_PROD = "https://citconpay.cn/";
 
     // AMS
-    private static final String URL_AMS_DEV = "https://uat.citconpay.com/";
+    private static final String URL_AMS_DEV = "https://dev.citconpay.com/";
     private static final String URL_AMS_UAT = "https://uat.citconpay.com/";
-    private static final String URL_AMS_PROD = "https://uat.citconpay.com/";
+    private static final String URL_AMS_PROD = "https://citconpay.com/";
 
     // UNIONPAY
-    private static final String URL_UNIONPAY_DEV = "https://uat.citconpay.com/";
+    private static final String URL_UNIONPAY_DEV = "https://dev.citconpay.com/";
     private static final String URL_UNIONPAY_UAT = "https://uat.citconpay.com/";
-    private static final String URL_UNIONPAY_PROD = "https://uat.citconpay.com/";
+    private static final String URL_UNIONPAY_PROD = "https://citconpay.com/";
 
     public static String getEntryPoint(String currency, String vendor, CPayEntryType cType) {
         String baseURL = getBaseURL(currency, vendor);
