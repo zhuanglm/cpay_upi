@@ -290,9 +290,7 @@ public class CPaySDK {
 
     public void gotUnionPay(CPayOrderResult result) {
         String tn = result.mSignedString;
-        //UPPayAssistEx.startPay(mApiManager.context, null, null, tn,  env == DEV ? "01": "00");
-        //temporarily set to dev whether dev or uat
-        UPPayAssistEx.startPay(mApiManager.context, null, null, tn,  "01");
+        UPPayAssistEx.startPay(mApiManager.context, null, null, tn,  (env == DEV || env == UAT) ? "01": "00");
     }
 
     public void gotWX(WXPayorder result, String mCurrency) {
