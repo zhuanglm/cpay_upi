@@ -110,7 +110,7 @@ makeJar.dependsOn(clearJar, build)
 
 ext {
     PUBLISH_GROUP_ID = 'com.citcon.sdk'
-    PUBLISH_VERSION = '1.0.2'
+    PUBLISH_VERSION = '2.2.0'
     PUBLISH_ARTIFACT_ID = 'mobile'
 }
 
