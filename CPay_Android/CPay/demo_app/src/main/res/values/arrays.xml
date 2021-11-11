@@ -25,4 +25,13 @@
         <item>PROD</item>
     </string-array>
 
+    <string-array name="currency_list">
+        <item>USD</item>
+        <item>CAD</item>
+        <item>HKD</item>
+        <item>KRW</item>
+        <item>CNY</item>
+        <item>IDR</item>
+    </string-array>
+
 </resources>
