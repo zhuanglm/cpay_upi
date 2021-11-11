@@ -38,7 +38,10 @@ android {
             outputFileName = "citcon-sdk-${variant.name}.aar"
         }
     }
+
+
 }
+
 
 repositories {
     flatDir {
@@ -67,6 +70,7 @@ dependencies {
 task javaHome {
     println"JAVA_HOME:" + System.getProperty("java.home")
 }
+
 
 
 task clearJar(type: Delete) {
@@ -104,3 +108,10 @@ task superSimpleJar(type: Jar) {
 makeJar.dependsOn(clearJar, build)
 
 
+ext {
+    PUBLISH_GROUP_ID = 'com.citcon.sdk'
+    PUBLISH_VERSION = '2.2.0'
+    PUBLISH_ARTIFACT_ID = 'mobile'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
