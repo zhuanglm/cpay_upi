@@ -74,7 +74,7 @@ public class CPayOrder {
         returned.put("subject", mSubject);
         returned.put("body", mBody);
 
-        if (mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop")) {
+        if (mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop")|| mVendor.equals("cc")) {
             //Please only use amount when the payment method is alipay, wechatpay, cc, or upop.
             //Please only use trans_amount when the payment method is jkopay, alipay_hk, kakaopay, gcash, dana, truemoney, bkash, or easypaisa.
             returned.put("amount", mAmount);

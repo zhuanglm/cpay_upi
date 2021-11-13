@@ -88,7 +88,7 @@ public class APIManager {
                                 result.prepayid = response.optString("prepayid");
                                 result.sign = response.optString("sign");
                                 result.extData = response.optString("order_id");
-                                CPaySDK.getInstance().gotWX(result, order.getmCurrency());
+                                CPaySDK.getInstance().gotWX(result, order);
                                 break;
                             }
                             case "alipay": {
@@ -204,4 +204,50 @@ public class APIManager {
         ));
         mGlobalRequestQueue.add(request);
     }
+
+    public void inquireOrderByRef(final String referenceId, final String currency, final String vendor) {
+        String entryPoint = CPayEnv.getEntryPoint(currency, vendor, CPayEntryType.INQUIRE);
+        if (entryPoint == null) {
+            Log.e(TAG, "inquireOrderByRef: baseURL error, please check currency and vendor");
+            CPaySDK.getInstance().onInquiredOrderError();
+            return;
+        }
+
+        Map<String, String> payload = new HashMap<>();
+        payload.put("reference", referenceId);
+        payload.put("inquire_method", "real");
+        CPayInquireRequest request = new CPayInquireRequest(Request.Method.POST, entryPoint, payload,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        CPayInquireResult inquireResult = new CPayInquireResult();
+                        inquireResult.mId = response.optString("id");
+                        inquireResult.mType = response.optString("type");
+                        inquireResult.mAmount = response.optString("amount");
+                        inquireResult.mTime = response.optString("time");
+                        inquireResult.mReference = response.optString("reference");
+                        inquireResult.mStatus = response.optString("status");
+                        inquireResult.mCurrency = response.optString("currency");
+                        inquireResult.mNote = response.optString("note");
+                        CPaySDK.getInstance().inquiredOrder(inquireResult);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        CPaySDK.getInstance().onInquiredOrderError();
+                    }
+                }
+        );
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                20 * 1000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+
+        ));
+        mGlobalRequestQueue.add(request);
+    }
+
+
 }
