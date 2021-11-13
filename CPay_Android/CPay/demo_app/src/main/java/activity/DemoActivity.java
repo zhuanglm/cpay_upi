@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +21,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import citcon.cpay.R;
 import sdk.CPaySDK;
@@ -32,9 +33,9 @@ import sdk.models.CPayOrderResult;
 public class DemoActivity extends AppCompatActivity {
     private final static String TAG = "DemoActivity";
 
-        // mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
+    // mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
     private final static int PRESET[][] =
-                    {{1, 0, 0, 1}, // upop dev usd
+            {{1, 0, 0, 1}, // upop dev usd
                     {0, 0, 0, 1}, // wechatpay? uat usd
                     {0, 0, 2, 1}, // alipay?
                     {0, 1, 3, 100}, // kakaopay
@@ -54,6 +55,13 @@ public class DemoActivity extends AppCompatActivity {
     private Switch mSwitch;
     private TextView mResultTextView;
     private ScrollView mScrollView;
+
+    private EditText mExtKey1;
+    private EditText mExtKey2;
+    private EditText mExtValue1;
+    private EditText mExtValue2;
+
+
     // After Pay success query transaction result
     private BroadcastReceiver mInquireReceiver;
 
@@ -106,6 +114,11 @@ public class DemoActivity extends AppCompatActivity {
         mSwitch = (Switch) findViewById(R.id.duplicate_switch);
         mResultTextView = (TextView) findViewById(R.id.result_textView);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
+        mExtKey1 = (EditText) findViewById(R.id.key1_edittext);
+        mExtKey2 = (EditText) findViewById(R.id.key2_edittext);
+        mExtValue1 = (EditText) findViewById(R.id.value1_edittext);
+        mExtValue2 = (EditText) findViewById(R.id.value2_edittext);
+
 
         mReferenceIdEditText.setText(REF_ID); //Citcon Referance ID
         mSubjectEditText.setText("Test"); // order subject
@@ -136,6 +149,20 @@ public class DemoActivity extends AppCompatActivity {
                 CPaySDK.setMode(mModeSpinner.getSelectedItem().toString());
                 CPaySDK.setToken(mTokenSpinner.getSelectedItem().toString());
 
+                String key1 = mExtKey1.getText().toString().trim();
+                String key2 = mExtKey2.getText().toString().trim();
+                String value1 = mExtValue1.getText().toString().trim();
+                String value2 = mExtValue2.getText().toString().trim();
+
+                HashMap<String, String> ext = new HashMap<>();
+                if (!TextUtils.isEmpty(key1) && !TextUtils.isEmpty(value1)) {
+                    ext.put(key1, value1);
+                }
+
+                if (!TextUtils.isEmpty(key2) && !TextUtils.isEmpty(value2)) {
+                    ext.put(key2, value2);
+                }
+
                 CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
                         mSubjectEditText.getText().toString(),
                         mBodyEditText.getText().toString(),
@@ -144,7 +171,8 @@ public class DemoActivity extends AppCompatActivity {
                         mVendorSpinner.getSelectedItem().toString(),
                         mIpnEditText.getText().toString(),
                         mCallbackEditText.getText().toString(),
-                        mSwitch.isChecked());
+                        mSwitch.isChecked(),
+                        ext);
 
                 CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>() {
                     @Override

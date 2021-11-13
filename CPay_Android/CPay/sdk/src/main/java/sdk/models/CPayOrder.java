@@ -2,6 +2,9 @@ package sdk.models;
 
 import android.text.TextUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +24,7 @@ public class CPayOrder {
     private String mIpnUrl;
     private String mCallbackUrl;
     private boolean mAllowDuplicate;
+    private HashMap<String, String> mExt;
 
     public String getmVendor() {
         return mVendor;
@@ -38,12 +42,23 @@ public class CPayOrder {
         return this.mCurrency;
     }
 
+    public HashMap<String, String> getmExt() {
+        return mExt;
+    }
+
+
     public CPayOrder() {
 
     }
 
     public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
                      boolean allowDuplicate) {
+
+        this(referenceId, subject, body, amount, currency, vendor, ipnUrl, callbackUrl, allowDuplicate, null);
+    }
+
+    public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
+                     boolean allowDuplicate, HashMap<String, String> ext) {
         mReferenceId = referenceId;
         mAmount = amount;
         mCurrency = TextUtils.isEmpty(currency) /*|| (!currency.equals(CPayEnv.USD) && !currency.equals(CPayEnv.CNY))*/ ? CPayEnv.USD : currency;
@@ -53,6 +68,7 @@ public class CPayOrder {
         mIpnUrl = ipnUrl;
         mCallbackUrl = callbackUrl;
         mAllowDuplicate = allowDuplicate;
+        mExt = ext;
     }
 
     public boolean isValid() {
@@ -74,7 +90,7 @@ public class CPayOrder {
         returned.put("subject", mSubject);
         returned.put("body", mBody);
 
-        if (mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop")|| mVendor.equals("cc")) {
+        if (mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop") || mVendor.equals("cc")) {
             //Please only use amount when the payment method is alipay, wechatpay, cc, or upop.
             //Please only use trans_amount when the payment method is jkopay, alipay_hk, kakaopay, gcash, dana, truemoney, bkash, or easypaisa.
             returned.put("amount", mAmount);
@@ -88,6 +104,13 @@ public class CPayOrder {
         returned.put("callback_url", mCallbackUrl);
         returned.put("allow_duplicates", mAllowDuplicate ? "yes" : "no");
         returned.put("vendor", mVendor);
+
+        if(mExt != null && !mExt.isEmpty()){
+            returned.put("ext", new JSONObject(mExt).toString());
+        }
+
         return returned;
     }
+
+
 }
