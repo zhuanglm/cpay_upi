@@ -18,8 +18,8 @@
                 android:id="@+id/token_spinner"
                 android:layout_width="200dp"
                 android:layout_height="25dp"
-                android:layout_marginTop="20dp"
                 android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginRight="20dp"
                 android:background="@drawable/rect"
                 android:entries="@array/token_list"
@@ -29,11 +29,11 @@
             <Spinner
                 android:id="@+id/mode_spinner"
                 android:layout_width="wrap_content"
-                android:layout_toRightOf="@+id/token_spinner"
                 android:layout_height="25dp"
-                android:layout_marginTop="20dp"
                 android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginRight="20dp"
+                android:layout_toRightOf="@+id/token_spinner"
                 android:background="@drawable/rect"
                 android:entries="@array/mode_list"
                 android:paddingLeft="5dp"
@@ -169,8 +169,8 @@
                     android:layout_marginRight="20dp"
                     android:layout_toRightOf="@id/mid"
                     android:background="@drawable/rect"
-                    android:inputType="textNoSuggestions"
                     android:entries="@array/currency_list"
+                    android:inputType="textNoSuggestions"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:textSize="14sp" />
@@ -283,11 +283,101 @@
                 android:paddingRight="5dp"
                 android:textSize="14sp" />
 
+            <TextView
+                android:id="@+id/ext_textview"
+                android:layout_width="fill_parent"
+                android:layout_height="20dp"
+                android:layout_below="@id/callback_editText"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="20dp"
+                android:text="@string/ext"
+                android:textSize="14sp" />
+
+            <RelativeLayout
+                android:id="@+id/ext_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ext_textview"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp">
+
+                <View
+                    android:id="@+id/mid2"
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:layout_centerHorizontal="true" />
+
+                <EditText
+                    android:id="@+id/key1_edittext"
+                    android:layout_width="fill_parent"
+                    android:layout_height="25dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_toLeftOf="@id/mid2"
+                    android:background="@drawable/rect"
+                    android:text="reference2"
+                    android:inputType="text"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textSize="14sp" />
+
+
+                <EditText
+                    android:id="@+id/value1_edittext"
+                    android:layout_width="fill_parent"
+                    android:layout_height="25dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@id/mid2"
+                    android:background="@drawable/rect"
+                    android:hint="123456789"
+                    android:inputType="text"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/key2_edittext"
+                    android:layout_width="fill_parent"
+                    android:layout_height="25dp"
+                    android:layout_below="@+id/key1_edittext"
+                    android:layout_marginRight="10dp"
+                    android:layout_toLeftOf="@id/mid2"
+                    android:background="@drawable/rect"
+                    android:hint="key2"
+                    android:inputType="text"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_toStartOf="@id/mid2"
+                    android:layout_marginTop="5dp"/>
+
+
+                <EditText
+                    android:id="@+id/value2_edittext"
+                    android:layout_width="fill_parent"
+                    android:layout_height="25dp"
+                    android:layout_below="@+id/value1_edittext"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@id/mid2"
+                    android:background="@drawable/rect"
+                    android:hint="value2"
+                    android:inputType="text"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:textSize="14sp"
+                    android:layout_marginStart="10dp"
+                    android:layout_toEndOf="@id/mid2"
+                    android:layout_marginTop="5dp"/>
+
+            </RelativeLayout>
+
+
             <Button
                 android:id="@+id/request_button"
                 android:layout_width="160dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/callback_editText"
+                android:layout_below="@+id/ext_layout"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
                 android:text="@string/request_order" />

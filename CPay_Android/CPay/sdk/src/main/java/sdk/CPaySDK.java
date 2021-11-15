@@ -125,6 +125,11 @@ public class CPaySDK {
         mApiManager.inquireOrder(orderResult);
     }
 
+    public void inquireOrderByRef(String referenceId, String currency, String vendor, final InquireResponse<CPayInquireResult> listener) {
+        mInquireListener = listener;
+        mApiManager.inquireOrderByRef(referenceId, currency, vendor);
+    }
+
 
     @SuppressWarnings("deprecation")
     public void gotOrder(CPayOrderResult orderResult) {
@@ -138,6 +143,8 @@ public class CPaySDK {
     public void inquiredOrder(CPayInquireResult inquireResult) {
         mInquireListener.gotInquireResult(inquireResult);
     }
+
+
 
 
     private Handler mHandler = new Handler(new Handler.Callback() {
@@ -293,14 +300,12 @@ public class CPaySDK {
         UPPayAssistEx.startPay(mApiManager.context, null, null, tn,  (env == DEV || env == UAT) ? "01": "00");
     }
 
-    public void gotWX(WXPayorder result, String mCurrency) {
+    public void gotWX(WXPayorder result, CPayOrder order) {
 
         mOrderResult = new CPayOrderResult();
-        mOrderResult.mCurrency = mCurrency;
-        mOrderResult.mOrder = new CPayOrder();
+        mOrderResult.mCurrency = order.getmCurrency();
+        mOrderResult.mOrder = order;
         mOrderResult.mOrderId = result.extData;
-        mOrderResult.mOrder.setmVendor("wechatpay");
-        mOrderResult.mOrder.setmCurrency(mCurrency);
         mOrderResult.mRedirectUrl = "";
 
         PayReq req = new PayReq();

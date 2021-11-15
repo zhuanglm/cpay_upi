@@ -8,7 +8,7 @@ public class WXPayorder {
     public String timestamp;
     public String sign;
     public String mPackage;
-    public String extData;
+    public String extData; // Android only equal Citcon order_id
     public WXPayorder()
     {
 

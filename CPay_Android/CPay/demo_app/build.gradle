@@ -76,8 +76,8 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     // for debug apk
-    //implementation project(':sdk')
-    implementation 'com.citcon.sdk:mobile:2.2.0'
+    implementation project(':sdk')
+//    implementation 'com.citcon.sdk:mobile:2.2.1'
 
     // for release aar
 //    implementation(name: 'citcon-sdk-release', ext: 'aar')
