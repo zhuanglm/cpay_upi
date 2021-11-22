@@ -6,8 +6,6 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 6
-        versionName "2.4.1"
 
         multiDexEnabled true
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -58,13 +56,13 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     testImplementation 'junit:junit:4.13.2'
     implementation 'androidx.multidex:multidex:2.0.1'
     compileOnly 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.9'
-    compileOnly 'com.github.mastergyp:citcon-alipay:0.9.1'
-    compileOnly 'com.github.mastergyp:citcon-unionpay:1.0.0'
+    compileOnly 'com.citcon.sdk:alipay:15.8.03'
+    compileOnly 'com.citcon.sdk:unionpay:3.3.0'
 }
 
 task javaHome {
