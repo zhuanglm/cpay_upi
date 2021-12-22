@@ -19,9 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 import citcon.cpay.R;
 import sdk.CPaySDK;
@@ -33,14 +35,16 @@ import sdk.models.CPayOrderResult;
 public class DemoActivity extends AppCompatActivity {
     private final static String TAG = "DemoActivity";
 
-    // mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
-    private final static int PRESET[][] =
-            {{1, 0, 0, 1}, // upop dev usd
-                    {0, 0, 0, 1}, // wechatpay? uat usd
-                    {0, 0, 2, 1}, // alipay?
-                    {0, 1, 3, 100}, // kakaopay
-                    {0, 1, 5, 30000}, // dana
-                    {0, 2, 0, 1}}; //alipay hk uat hkd
+    //mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
+    private final static int[][] PRESET =
+            {
+                    {0, 0, 3, 1}, // kcp dev usd
+                    {0, 2, 0, 1}, // upop uat usd
+                    {0, 2, 0, 1}, // wechatpay? uat usd
+                    {0, 2, 0, 1}, // alipay?
+                    {0, 2, 3, 100}, // kakaopay
+                    {0, 2, 5, 30000}, // dana
+                    {0, 2, 2, 100}}; //alipay hk uat hkd
 
     private EditText mReferenceIdEditText;
     private EditText mSubjectEditText;
@@ -52,7 +56,7 @@ public class DemoActivity extends AppCompatActivity {
     private Spinner mTokenSpinner;
     private EditText mIpnEditText;
     private EditText mCallbackEditText;
-    private Switch mSwitch;
+    private SwitchCompat mSwitch;
     private TextView mResultTextView;
     private ScrollView mScrollView;
 
@@ -64,10 +68,6 @@ public class DemoActivity extends AppCompatActivity {
 
     // After Pay success query transaction result
     private BroadcastReceiver mInquireReceiver;
-
-    private String REF_ID;
-    private String CALLBACK_URL;
-    private String IPN_URL;
 
     //    boolean testUSD = true;
 //    private static final String AMS_TOKEN = "XYIL2W9BCQSTNN1CXUQ6WEH9JQYZ3VLM";
@@ -81,14 +81,14 @@ public class DemoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_demo);
         CPaySDK.getInstance(DemoActivity.this, null);
 
-        String CURRENCY = "USD";
+        //String CURRENCY = "USD";
 
 //        if (testUSD) {
 
-        REF_ID = "202108170633";
+        String REF_ID = "202108170633";
 //        AUTH_TOKEN = UNIONPAY_TOKEN;
-        IPN_URL = "https://merchant.com/ipn.php";
-        CALLBACK_URL = "https://dev.citcon-inc.com";
+        String IPN_URL = "https://merchant.com/ipn.php";
+        String CALLBACK_URL = "https://dev.citcon-inc.com";
         /*} else {
             REF_ID = "CNY-mobile-test";
             AUTH_TOKEN = "CNYAPPF6A0FE479A891BF45706A690AE";
@@ -101,23 +101,23 @@ public class DemoActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 1);
 
-        mReferenceIdEditText = (EditText) findViewById(R.id.reference_id_editText);
-        mSubjectEditText = (EditText) findViewById(R.id.subject_editText);
-        mBodyEditText = (EditText) findViewById(R.id.body_editText);
-        mAmountEditText = (EditText) findViewById(R.id.amount_editText);
-        mCurrencySpinner = (Spinner) findViewById(R.id.currency_spinner);
-        mVendorSpinner = (Spinner) findViewById(R.id.vendor_spinner);
-        mModeSpinner = (Spinner) findViewById(R.id.mode_spinner);
-        mTokenSpinner = (Spinner) findViewById(R.id.token_spinner);
-        mIpnEditText = (EditText) findViewById(R.id.ipn_editText);
-        mCallbackEditText = (EditText) findViewById(R.id.callback_editText);
-        mSwitch = (Switch) findViewById(R.id.duplicate_switch);
-        mResultTextView = (TextView) findViewById(R.id.result_textView);
-        mScrollView = (ScrollView) findViewById(R.id.scrollView);
-        mExtKey1 = (EditText) findViewById(R.id.key1_edittext);
-        mExtKey2 = (EditText) findViewById(R.id.key2_edittext);
-        mExtValue1 = (EditText) findViewById(R.id.value1_edittext);
-        mExtValue2 = (EditText) findViewById(R.id.value2_edittext);
+        mReferenceIdEditText = findViewById(R.id.reference_id_editText);
+        mSubjectEditText = findViewById(R.id.subject_editText);
+        mBodyEditText = findViewById(R.id.body_editText);
+        mAmountEditText = findViewById(R.id.amount_editText);
+        mCurrencySpinner = findViewById(R.id.currency_spinner);
+        mVendorSpinner = findViewById(R.id.vendor_spinner);
+        mModeSpinner = findViewById(R.id.mode_spinner);
+        mTokenSpinner = findViewById(R.id.token_spinner);
+        mIpnEditText = findViewById(R.id.ipn_editText);
+        mCallbackEditText = findViewById(R.id.callback_editText);
+        mSwitch = findViewById(R.id.duplicate_switch);
+        mResultTextView = findViewById(R.id.result_textView);
+        mScrollView = findViewById(R.id.scrollView);
+        mExtKey1 = findViewById(R.id.key1_edittext);
+        mExtKey2 = findViewById(R.id.key2_edittext);
+        mExtValue1 = findViewById(R.id.value1_edittext);
+        mExtValue2 = findViewById(R.id.value2_edittext);
 
 
         mReferenceIdEditText.setText(REF_ID); //Citcon Referance ID
@@ -141,7 +141,7 @@ public class DemoActivity extends AppCompatActivity {
             }
         });
 
-        Button requestButton = (Button) findViewById(R.id.request_button);
+        Button requestButton = findViewById(R.id.request_button);
         requestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -163,7 +163,7 @@ public class DemoActivity extends AppCompatActivity {
                     ext.put(key2, value2);
                 }
 
-                CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
+                /*CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
                         mSubjectEditText.getText().toString(),
                         mBodyEditText.getText().toString(),
                         mAmountEditText.getText().toString(),
@@ -172,9 +172,43 @@ public class DemoActivity extends AppCompatActivity {
                         mIpnEditText.getText().toString(),
                         mCallbackEditText.getText().toString(),
                         mSwitch.isChecked(),
-                        ext);
+                        ext);*/
 
-                CPaySDK.getInstance().requestOrder(order, new OrderResponse<CPayOrderResult>() {
+                CPayOrder order = new CPayOrder.Builder()
+                        .setReferenceId(mReferenceIdEditText.getText().toString())
+                        .setSubject(mSubjectEditText.getText().toString())
+                        .setBody(mBodyEditText.getText().toString())
+                        .setAmount(mAmountEditText.getText().toString())
+                        .setCurrency(mCurrencySpinner.getSelectedItem().toString())
+                        .setVendor(mVendorSpinner.getSelectedItem().toString())
+                        .setIpnUrl(mIpnEditText.getText().toString())
+                        .setCallbackUrl(mCallbackEditText.getText().toString())
+                        .setAllowDuplicate(mSwitch.isChecked())
+                        .build();
+
+                CPayOrder kcpOrder = new CPayOrder.Builder()
+                        .setReferenceId(mReferenceIdEditText.getText().toString())
+                        .setSubject(mSubjectEditText.getText().toString())
+                        .setBody(mBodyEditText.getText().toString())
+                        .setAmount(mAmountEditText.getText().toString())
+                        .setCurrency(mCurrencySpinner.getSelectedItem().toString())
+                        .setVendor("card")
+                        .setIpnUrl(mIpnEditText.getText().toString())
+                        .setCallbackUrl(mCallbackEditText.getText().toString())
+                        .setAllowDuplicate(mSwitch.isChecked())
+                        .setSource("app_h5")
+                        .setAutoCapture(true)
+                        .setCountry(Locale.KOREA)
+                        .setNote("note dddd")
+                        .setCallbackFailUrl("https://exampe.com/fail")
+                        .setCallbackCancelUrl("https://exampe.com/cancel")
+                        .setConsumer("John","Doe","6145675309",
+                                "test.sam@test.com","consumer-reference-000")
+                        .setGoods("Battery Power Pack", 0,0,0)
+                        .build();
+
+                CPaySDK.getInstance().requestOrder(mVendorSpinner.getSelectedItem().toString().equals("kcp")?
+                        kcpOrder : order, new OrderResponse<CPayOrderResult>() {
                     @Override
                     public void gotOrderResult(final CPayOrderResult orderResult) {
                         if (orderResult == null) {

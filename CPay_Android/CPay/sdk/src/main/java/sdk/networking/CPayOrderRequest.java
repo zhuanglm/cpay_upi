@@ -1,5 +1,7 @@
 package sdk.networking;
 
+import android.content.Context;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -11,22 +13,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 import sdk.CPaySDK;
+import sdk.models.CPayOrder;
 
 /**
  * Created by alexandrudiaconu on 7/22/17.
  */
 
 public class CPayOrderRequest extends Request<JSONObject> {
-    private Response.Listener<JSONObject> mListener;
-    private Map<String, String> mParams;
+    private final Response.Listener<JSONObject> mListener;
+    private final Map<String, String> mParams;
+    private final String mOrderType;
 
-    public CPayOrderRequest(int method, String url, Map<String, String> params,
+    public CPayOrderRequest(int method, String url, CPayOrder order/*Map<String, String> params*/,
                             Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         this.mListener = reponseListener;
-        this.mParams = params;
+        this.mParams = order.toPayload();
+        this.mOrderType = order.getVendor();
     }
 
+    @Override
     protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
         return mParams;
     }
@@ -46,7 +52,13 @@ public class CPayOrderRequest extends Request<JSONObject> {
         Map<String, String> headers = new HashMap<>();
         String auth = "Bearer " + CPaySDK.getInstance().mToken;
         headers.put("Authorization", auth);
-        headers.put("Accept-Encoding", "identity");
+
+        if(mOrderType.equals("card")) {
+            //this is specific for connector
+            headers.put("Content-Type", "application/x-www-form-urlencoded");
+        } else {
+            headers.put("Accept-Encoding", "identity");
+        }
         return headers;
     }
 }

@@ -15,6 +15,7 @@ public class CPayEnv {
     public static final String CNY = "CNY";
 
     // api type
+    public static final String KCP_ORDER_PATH = "payment/pay";
     public static final String ORDER_PATH = "payment/pay_app";
     public static final String AMS_ORDER_PATH = "payment/pay_app";
     public static final String INQUIRE_PATH = "payment/inquire";
@@ -38,6 +39,11 @@ public class CPayEnv {
     private static final String URL_UNIONPAY_UAT = "https://uat.citconpay.com/";
     private static final String URL_UNIONPAY_PROD = "https://citconpay.com/";
 
+    // KCP
+    private static final String URL_KCP_DEV = "https://dev.citconpay.com/";
+    private static final String URL_KCP_UAT = "https://uat.citconpay.com/";
+    private static final String URL_KCP_PROD = "https://citconpay.com/";
+
     public static String getEntryPoint(String currency, String vendor, CPayEntryType cType) {
         String baseURL = getBaseURL(currency, vendor);
         if(baseURL == null){
@@ -51,8 +57,10 @@ public class CPayEnv {
         if (cType == CPayEntryType.ORDER) {
             if (vendor.equals("gcash") || vendor.equals("dana") || vendor.equals("alipay_hk") || vendor.equals("kakaopay")) {
                 return AMS_ORDER_PATH;
-            }else if (vendor.equals("upop")) {
+            } else if (vendor.equals("upop")) {
                 return AMS_ORDER_PATH;
+            } else if (vendor.equals("card")) {
+                return KCP_ORDER_PATH;
             } else {
                 return ORDER_PATH;
             }
@@ -108,6 +116,17 @@ public class CPayEnv {
                         return URL_UNIONPAY_UAT;
                     case PROD:
                         return URL_UNIONPAY_PROD;
+                }
+
+                //kcp test
+            case "card":
+                switch (env) {
+                    case DEV:
+                        return URL_KCP_DEV;
+                    case UAT:
+                        return URL_KCP_UAT;
+                    case PROD:
+                        return URL_KCP_PROD;
                 }
         }
 

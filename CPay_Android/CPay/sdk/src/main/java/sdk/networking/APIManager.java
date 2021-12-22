@@ -4,13 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.Volley;
+
 import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +35,6 @@ public class APIManager {
     private static final String TAG = "APIManager";
     private static APIManager sInstance;
     private final RequestQueue mGlobalRequestQueue;
-    public Context context;
 
     public static APIManager getInstance(Context context) {
         if (sInstance == null)
@@ -39,37 +43,39 @@ public class APIManager {
     }
 
     private APIManager(Context context) {
-        this.context = context;
         mGlobalRequestQueue = Volley.newRequestQueue(context);
+        VolleyLog.DEBUG = true;
     }
 
-    public void requestOrder(final CPayOrder order) {
+    public void requestOrder(final Context context, final CPayOrder order) {
 
-        if (!order.getmVendor().equals("wechatpay")
-                && !order.getmVendor().equals("alipay")
-                && !order.getmVendor().equals("alipay_hk")
-                && !order.getmVendor().equals("gcash")
-                && !order.getmVendor().equals("kakaopay")
-                && !order.getmVendor().equals("dana")
-                && !order.getmVendor().equals("upop")) {
-            Log.e(TAG, "Error unknown vendor: " + order.getmVendor());
+        if (!order.getVendor().equals("wechatpay")
+                && !order.getVendor().equals("alipay")
+                && !order.getVendor().equals("alipay_hk")
+                && !order.getVendor().equals("gcash")
+                && !order.getVendor().equals("kakaopay")
+                && !order.getVendor().equals("dana")
+                && !order.getVendor().equals("upop")
+                && !order.getVendor().equals("card")) {
+            Log.e(TAG, "Error unknown vendor: " + order.getVendor());
             CPaySDK.getInstance().onOrderRequestError();
             return;
         }
 
-        String entryPoint = CPayEnv.getEntryPoint(order.getmCurrency(), order.getmVendor(), CPayEntryType.ORDER);
+        String entryPoint = CPayEnv.getEntryPoint(order.getCurrency(), order.getVendor(), CPayEntryType.ORDER);
         if (entryPoint == null) {
             Log.e(TAG, "requestOrder: baseURL error, please check currency and vendor");
             CPaySDK.getInstance().onOrderRequestError();
             return;
         }
         Log.e(TAG, entryPoint);
-        final Context context = this.context;
-        CPayOrderRequest request = new CPayOrderRequest(Request.Method.POST, entryPoint, order.toPayload(),
+
+        CPayOrderRequest request = new CPayOrderRequest(Request.Method.POST, entryPoint, order,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        if (response.optBoolean("failed")) {
+                        if (response.optBoolean("failed") ||
+                                response.optString("result").equals("fail")) {
                             // {"failed":true,"message":"Invalid request."}
                             String errorMessage = response.optString("message");
                             Log.e(TAG, "Error when requestOrder reason: " + errorMessage);
@@ -77,7 +83,7 @@ public class APIManager {
                             return;
                         }
 
-                        switch (order.getmVendor()) {
+                        switch (order.getVendor()) {
                             case "wechatpay": {
                                 WXPayorder result = new WXPayorder();
                                 result.appid = response.optString("appid");
@@ -97,7 +103,7 @@ public class APIManager {
                                 result.mOrderId = response.optString("order_id");
                                 result.mSignedString = response.optString("signed_string");
                                 result.mOrderSpec = response.optString("orderSpec");
-                                result.mCurrency = order.getmCurrency();
+                                result.mCurrency = order.getCurrency();
                                 result.mOrder = order;
                                 CPaySDK.getInstance().gotAlipay(result);
                                 break;
@@ -111,7 +117,7 @@ public class APIManager {
                                 result.mOrderId = response.optString("order_id");
                                 result.mSignedString = response.optString("signed_string");
                                 result.mOrderSpec = response.optString("orderSpec");
-                                result.mCurrency = order.getmCurrency();
+                                result.mCurrency = order.getCurrency();
                                 result.mOrder = order;
                                 if (TextUtils.isEmpty(result.mRedirectUrl)||result.mRedirectUrl.equals("null")){
                                     Log.e(TAG, "redirect_url: is null");
@@ -134,11 +140,24 @@ public class APIManager {
                                 CPayOrderResult result = new CPayOrderResult();
                                 result.mOrderId = response.optString("order_id");
                                 result.mSignedString = response.optString("tn");
-                                result.mCurrency = order.getmCurrency();
+                                result.mCurrency = order.getCurrency();
                                 result.mOrder = order;
                                 CPaySDK.getInstance().gotUnionPay(result);
                                 CPaySDK.getInstance().setupOnResumeCheck(result);
                                 break;
+                            }
+
+                            case "card": {
+                                CPayOrderResult result = new CPayOrderResult();
+
+                                result.mOrder = order;
+                                result.mStatus = response.optString("status");
+                                result.mOrderId = response.optString("transaction_id");
+                                result.mRedirectUrl = response.optString("url");
+                                CPaySDK.getInstance().gotKCPay(result);
+                                CPaySDK.getInstance().setupOnResumeCheck(result);
+
+                                Log.i(TAG, "Response : " + response.toString());
                             }
                         }
                     }
@@ -157,12 +176,18 @@ public class APIManager {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
 
         ));
+        try {
+            Log.i(TAG, "Request header: " + request.getHeaders());
+            Log.i(TAG, "Request body: " + request.getParams());
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
+        }
         mGlobalRequestQueue.add(request);
 
     }
 
     public void inquireOrder(final CPayOrderResult orderResult) {
-        String entryPoint = CPayEnv.getEntryPoint(orderResult.mCurrency, orderResult.mOrder.getmVendor(), CPayEntryType.INQUIRE);
+        String entryPoint = CPayEnv.getEntryPoint(orderResult.mCurrency, orderResult.mOrder.getVendor(), CPayEntryType.INQUIRE);
         if (entryPoint == null) {
             Log.e(TAG, "requestOrder: baseURL error, please check currency and vendor");
             CPaySDK.getInstance().onInquiredOrderError();

@@ -225,14 +225,16 @@
                     android:text="@string/duplicate"
                     android:textSize="14sp" />
 
-                <Switch
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/duplicate_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/duplicate_textView"
                     android:layout_marginLeft="10dp"
                     android:layout_toRightOf="@id/mid"
-                    android:checked="true" />
+                    android:checked="true"
+                    android:layout_marginStart="10dp"
+                    android:layout_toEndOf="@id/mid" />
             </RelativeLayout>
 
             <TextView

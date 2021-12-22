@@ -17,11 +17,11 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
-    File keystore = rootProject.file("/Users/raymond.zhuang/StudioProjects/certificate/android_pos.jks");
+    File keystore = rootProject.file("/Users/raymond.zhuang/StudioProjects/certificate/android_pos.jks")
     if ( keystore.isFile() ) {
         println 'Use local keystore'
     } else {
-        keystore = new File("release.keystore");
+        keystore = new File("release.keystore")
         println 'Github action keystore'
     }
 
@@ -65,19 +65,11 @@ android {
     }
 }
 
-
-
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     // for debug apk
-    //implementation project(':sdk')
-    implementation 'com.citcon.sdk:mobile:2.4.1'
+    implementation project(':sdk')
+    //implementation 'com.citcon.sdk:mobile:2.4.1'
 
     // for release aar
 //    implementation(name: 'citcon-sdk-release', ext: 'aar')

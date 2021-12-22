@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -117,7 +118,7 @@ public class CPaySDK {
 
     public void requestOrder(CPayOrder order, final OrderResponse<CPayOrderResult> listener) {
         mOrderListener = listener;
-        mApiManager.requestOrder(order);
+        mApiManager.requestOrder(mActivity,order);
     }
 
     public void inquireOrder(CPayOrderResult orderResult, final InquireResponse<CPayInquireResult> listener) {
@@ -297,13 +298,18 @@ public class CPaySDK {
 
     public void gotUnionPay(CPayOrderResult result) {
         String tn = result.mSignedString;
-        UPPayAssistEx.startPay(mApiManager.context, null, null, tn,  (env == DEV || env == UAT) ? "01": "00");
+        UPPayAssistEx.startPay(mActivity, null, null, tn,  (env == DEV || env == UAT) ? "01": "00");
+    }
+
+    public void gotKCPay(CPayOrderResult result) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.mRedirectUrl));
+        mActivity.startActivity(browserIntent);
     }
 
     public void gotWX(WXPayorder result, CPayOrder order) {
 
         mOrderResult = new CPayOrderResult();
-        mOrderResult.mCurrency = order.getmCurrency();
+        mOrderResult.mCurrency = order.getCurrency();
         mOrderResult.mOrder = order;
         mOrderResult.mOrderId = result.extData;
         mOrderResult.mRedirectUrl = "";
