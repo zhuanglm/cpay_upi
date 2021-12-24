@@ -46,7 +46,7 @@ public class CPayInquireRequest extends Request<JSONObject>
     public Map<String, String> getHeaders() throws AuthFailureError
     {
         Map<String, String> headers = new HashMap<>();
-        String auth = "Bearer " + CPaySDK.getInstance().mToken;
+        String auth = "Bearer " + CPaySDK.initInstance().mToken;
         headers.put("Authorization", auth);
         return headers;
     }

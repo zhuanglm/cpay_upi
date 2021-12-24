@@ -382,6 +382,8 @@
                 android:layout_below="@+id/ext_layout"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="30dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:text="@string/request_order" />
 
             <TextView
@@ -393,6 +395,23 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginRight="20dp"
                 android:text="@string/result" />
+
+            <TextView
+                android:id="@+id/tv_sdk_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/request_button"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginBottom="0dp"
+                android:layout_toEndOf="@+id/request_button"
+                android:layout_toRightOf="@+id/request_button"
+                android:textColor="@android:color/darker_gray" />
+
 
         </RelativeLayout>
     </ScrollView>

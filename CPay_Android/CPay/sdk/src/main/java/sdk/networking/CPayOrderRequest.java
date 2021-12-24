@@ -1,7 +1,5 @@
 package sdk.networking;
 
-import android.content.Context;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -50,7 +48,7 @@ public class CPayOrderRequest extends Request<JSONObject> {
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         Map<String, String> headers = new HashMap<>();
-        String auth = "Bearer " + CPaySDK.getInstance().mToken;
+        String auth = "Bearer " + CPaySDK.initInstance().mToken;
         headers.put("Authorization", auth);
 
         if(mOrderType.equals("card")) {

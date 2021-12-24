@@ -1,6 +1,7 @@
 package activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +25,9 @@ import androidx.core.app.ActivityCompat;
 import java.util.HashMap;
 import java.util.Locale;
 
+import citcon.cpay.BuildConfig;
 import citcon.cpay.R;
+import sdk.CPayLaunchType;
 import sdk.CPaySDK;
 import sdk.interfaces.OrderResponse;
 import sdk.models.CPayInquireResult;
@@ -65,6 +67,7 @@ public class DemoActivity extends AppCompatActivity {
     private EditText mExtValue1;
     private EditText mExtValue2;
 
+    private Activity mActivity;
 
     // After Pay success query transaction result
     private BroadcastReceiver mInquireReceiver;
@@ -79,7 +82,8 @@ public class DemoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
-        CPaySDK.getInstance(DemoActivity.this, null);
+        mActivity = this;
+        CPaySDK.initInstance(DemoActivity.this, null);
 
         //String CURRENCY = "USD";
 
@@ -119,11 +123,12 @@ public class DemoActivity extends AppCompatActivity {
         mExtValue1 = findViewById(R.id.value1_edittext);
         mExtValue2 = findViewById(R.id.value2_edittext);
 
-
         mReferenceIdEditText.setText(REF_ID); //Citcon Referance ID
         mSubjectEditText.setText("Test"); // order subject
         mBodyEditText.setText("Test data"); // order body
 
+        TextView sdkVersionNumber = findViewById(R.id.tv_sdk_version);
+        sdkVersionNumber.setText(BuildConfig.VERSION_NAME);
 
         mIpnEditText.setText(IPN_URL); //citcon payment callback url
         mCallbackEditText.setText(CALLBACK_URL); // custom callback url to customization processing
@@ -187,6 +192,7 @@ public class DemoActivity extends AppCompatActivity {
                         .build();
 
                 CPayOrder kcpOrder = new CPayOrder.Builder()
+                        .setLaunchType(CPayLaunchType.URL)
                         .setReferenceId(mReferenceIdEditText.getText().toString())
                         .setSubject(mSubjectEditText.getText().toString())
                         .setBody(mBodyEditText.getText().toString())
@@ -207,7 +213,7 @@ public class DemoActivity extends AppCompatActivity {
                         .setGoods("Battery Power Pack", 0,0,0)
                         .build();
 
-                CPaySDK.getInstance().requestOrder(mVendorSpinner.getSelectedItem().toString().equals("kcp")?
+                CPaySDK.initInstance().requestOrder(mActivity, mVendorSpinner.getSelectedItem().toString().equals("kcp")?
                         kcpOrder : order, new OrderResponse<CPayOrderResult>() {
                     @Override
                     public void gotOrderResult(final CPayOrderResult orderResult) {
@@ -300,7 +306,7 @@ public class DemoActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        CPaySDK.getInstance().onResume();
+        CPaySDK.initInstance().onResume();
 //        if (testUSD) {
 //            CPaySDK.setMode(CPayMode.DEV);
 //        } else {
@@ -329,7 +335,7 @@ public class DemoActivity extends AppCompatActivity {
         if (mInquireReceiver != null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction("CPAY_INQUIRE_ORDER");
-            CPaySDK.getInstance().registerReceiver(mInquireReceiver, filter);
+            CPaySDK.initInstance().registerReceiver(mInquireReceiver, filter);
         }
     }
 
@@ -338,6 +344,7 @@ public class DemoActivity extends AppCompatActivity {
      */
     private void unregisterInquireReceiver() {
         if (mInquireReceiver != null)
-            CPaySDK.getInstance().unregisterReceiver(mInquireReceiver);
+            CPaySDK.initInstance().unregisterReceiver(mInquireReceiver);
     }
+
 }

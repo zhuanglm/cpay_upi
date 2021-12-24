@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
@@ -49,7 +48,7 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
         switch (resp.errCode){
             case 0:
                 // success
-                CPaySDK.getInstance().onWXPaySuccess(orderID);
+                CPaySDK.initInstance().onWXPaySuccess(orderID);
                 finish();
             case -1:
                 errMsg = "sign error";
@@ -61,7 +60,7 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
                 errMsg = "other error";
         }
 
-        CPaySDK.getInstance().onWXPayFailed(orderID, resp.errCode, errMsg);
+        CPaySDK.initInstance().onWXPayFailed(orderID, resp.errCode, errMsg);
         finish();
 
     }

@@ -1,13 +1,14 @@
 package sdk;
 
-import static sdk.CPayMode.*;
+import static sdk.CPayMode.DEV;
+import static sdk.CPayMode.PROD;
+import static sdk.CPayMode.UAT;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -42,7 +43,7 @@ public class CPaySDK {
     private OrderResponse<CPayOrderResult> mOrderListener;
     private InquireResponse<CPayInquireResult> mInquireListener;
     public String mToken;
-    private Activity mActivity;
+    //private Activity mActivity;
     private CPayOrderResult mOrderResult;
     public String mWXAppId;
     private CPayMode env = PROD;
@@ -90,15 +91,14 @@ public class CPaySDK {
     }
 
 
-    public static synchronized CPaySDK getInstance(Activity activity, String token) {
+    public static synchronized void initInstance(Activity activity, String token) {
         if (sInstance == null)
             sInstance = new CPaySDK(activity);
 
-        sInstance.mActivity = activity;
+        //sInstance.mActivity = activity;
         if(token != null){
             sInstance.mToken = token;
         }
-        return sInstance;
     }
 
     public static void setToken(String token){
@@ -108,7 +108,7 @@ public class CPaySDK {
     }
 
 
-    public static synchronized CPaySDK getInstance() {
+    public static synchronized CPaySDK initInstance() {
         if (sInstance == null) {
             throw new IllegalStateException(CPaySDK.class.getSimpleName() +
                     " is not initialized, call getInstance(...) first in the main Activity class");
@@ -116,9 +116,9 @@ public class CPaySDK {
         return sInstance;
     }
 
-    public void requestOrder(CPayOrder order, final OrderResponse<CPayOrderResult> listener) {
+    public void requestOrder(Activity activity, CPayOrder order, final OrderResponse<CPayOrderResult> listener) {
         mOrderListener = listener;
-        mApiManager.requestOrder(mActivity,order);
+        mApiManager.requestOrder(activity,order);
     }
 
     public void inquireOrder(CPayOrderResult orderResult, final InquireResponse<CPayInquireResult> listener) {
@@ -126,29 +126,18 @@ public class CPaySDK {
         mApiManager.inquireOrder(orderResult);
     }
 
+    @SuppressWarnings("unused")
     public void inquireOrderByRef(String referenceId, String currency, String vendor, final InquireResponse<CPayInquireResult> listener) {
         mInquireListener = listener;
         mApiManager.inquireOrderByRef(referenceId, currency, vendor);
-    }
-
-
-    @SuppressWarnings("deprecation")
-    public void gotOrder(CPayOrderResult orderResult) {
-        if (orderResult == null) {
-            mOrderListener.gotOrderResult(null);
-            return;
-        }
-        gotAlipay(orderResult);
     }
 
     public void inquiredOrder(CPayInquireResult inquireResult) {
         mInquireListener.gotInquireResult(inquireResult);
     }
 
-
-
-
-    private Handler mHandler = new Handler(new Handler.Callback() {
+    @SuppressWarnings("unchecked")
+    private final Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             allowQuery = true;
@@ -208,46 +197,43 @@ public class CPaySDK {
 
     private void inquireOrderInternally() {
 
-        CPaySDK.getInstance().inquireOrder(mOrderResult, new InquireResponse<CPayInquireResult>() {
-            @Override
-            public void gotInquireResult(CPayInquireResult response) {
-                if (response != null) {
-                    String emerging = "";
-                    emerging += "CHECK RESULT:\n\n";
-                    if (response.mId != null) {
-                        emerging += "ORDER ID: " + response.mId + "\n";
-                    }
-                    if (response.mType != null) {
-                        emerging += "TYPE: " + response.mType + "\n";
-                    }
-                    if (response.mAmount != null) {
-                        emerging += "AMOUNT: " + response.mAmount + "\n";
-                    }
-                    if (response.mTime != null) {
-                        emerging += "TIME: " + response.mTime + "\n";
-                    }
-                    if (response.mReference != null) {
-                        emerging += "REFERENCE: " + response.mReference + "\n";
-                    }
-                    if (response.mStatus != null) {
-                        emerging += "STATUS: " + response.mStatus + "\n";
-                    }
-                    if (response.mCurrency != null) {
-                        emerging += "CURRENCY: " + response.mCurrency + "\n";
-                    }
-                    if (response.mNote != null) {
-                        emerging += "NOTE: " + response.mNote + "\n";
-                    }
-
-                    Log.e("CPay", "inquiredOrder: " + emerging);
+        CPaySDK.initInstance().inquireOrder(mOrderResult, response -> {
+            if (response != null) {
+                String emerging = "";
+                emerging += "CHECK RESULT:\n\n";
+                if (response.mId != null) {
+                    emerging += "ORDER ID: " + response.mId + "\n";
+                }
+                if (response.mType != null) {
+                    emerging += "TYPE: " + response.mType + "\n";
+                }
+                if (response.mAmount != null) {
+                    emerging += "AMOUNT: " + response.mAmount + "\n";
+                }
+                if (response.mTime != null) {
+                    emerging += "TIME: " + response.mTime + "\n";
+                }
+                if (response.mReference != null) {
+                    emerging += "REFERENCE: " + response.mReference + "\n";
+                }
+                if (response.mStatus != null) {
+                    emerging += "STATUS: " + response.mStatus + "\n";
+                }
+                if (response.mCurrency != null) {
+                    emerging += "CURRENCY: " + response.mCurrency + "\n";
+                }
+                if (response.mNote != null) {
+                    emerging += "NOTE: " + response.mNote + "\n";
                 }
 
-                Intent intent = new Intent();
-                intent.setAction("CPAY_INQUIRE_ORDER");
-                intent.putExtra("inquire_result", response);
-                localBroadcastManager.sendBroadcast(intent);
-                // mActivity.sendBroadcast(intent);
+                Log.e("CPay", "inquiredOrder: " + emerging);
             }
+
+            Intent intent = new Intent();
+            intent.setAction("CPAY_INQUIRE_ORDER");
+            intent.putExtra("inquire_result", response);
+            localBroadcastManager.sendBroadcast(intent);
+            // mActivity.sendBroadcast(intent);
         });
     }
 
@@ -263,7 +249,7 @@ public class CPaySDK {
         }
     }
 
-    public void gotAlipay(CPayOrderResult orderResult) {
+    public void gotAlipay(Activity activity, CPayOrderResult orderResult) {
         mOrderResult = orderResult;
 
         final String orderInfo;
@@ -273,40 +259,32 @@ public class CPaySDK {
             orderInfo = mOrderResult.mOrderSpec + "&sign=\"" + mOrderResult.mSignedString + "\"&sign_type=\"RSA\"";
         }
 
-        Runnable payRunnable = new Runnable() {
-            @Override
-            public void run() {
-                PayTask alipay = new PayTask(mActivity);
+        Runnable payRunnable = () -> {
+            PayTask alipay = new PayTask(activity);
 
-                if (mOrderResult.mCurrency.equals("CNY")) {
-                    Map<String, String> result = alipay.payV2(orderInfo, true);
-                    Message msg = new Message();
-                    msg.obj = result;
-                    mHandler.sendMessage(msg);
-                } else {
-                    Log.e(TAG, orderInfo);
-                    String result = alipay.pay(orderInfo, true);
-                    Message msg = new Message();
-                    msg.obj = result;
-                    mHandler.sendMessage(msg);
-                }
+            if (mOrderResult.mCurrency.equals("CNY")) {
+                Map<String, String> result = alipay.payV2(orderInfo, true);
+                Message msg = new Message();
+                msg.obj = result;
+                mHandler.sendMessage(msg);
+            } else {
+                Log.e(TAG, orderInfo);
+                String result = alipay.pay(orderInfo, true);
+                Message msg = new Message();
+                msg.obj = result;
+                mHandler.sendMessage(msg);
             }
         };
         Thread payThread = new Thread(payRunnable);
         payThread.start();
     }
 
-    public void gotUnionPay(CPayOrderResult result) {
+    public void gotUnionPay(Activity activity, CPayOrderResult result) {
         String tn = result.mSignedString;
-        UPPayAssistEx.startPay(mActivity, null, null, tn,  (env == DEV || env == UAT) ? "01": "00");
+        UPPayAssistEx.startPay(activity, null, null, tn,  (env == DEV || env == UAT) ? "01": "00");
     }
 
-    public void gotKCPay(CPayOrderResult result) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.mRedirectUrl));
-        mActivity.startActivity(browserIntent);
-    }
-
-    public void gotWX(WXPayorder result, CPayOrder order) {
+    public void gotWX(Activity activity, WXPayorder result, CPayOrder order) {
 
         mOrderResult = new CPayOrderResult();
         mOrderResult.mCurrency = order.getCurrency();
@@ -327,7 +305,7 @@ public class CPaySDK {
         boolean argsCheck = req.checkArgs();
 
         setWXAppId(result.appid);
-        IWXAPI api = WXAPIFactory.createWXAPI(mActivity, result.appid);
+        IWXAPI api = WXAPIFactory.createWXAPI(activity, result.appid);
 
         boolean callWxRet = api.sendReq(req);
         Log.d("jim", "check args " + argsCheck);
@@ -403,4 +381,5 @@ public class CPaySDK {
     public void onInquiredOrderError() {
         mInquireListener.gotInquireResult(null);
     }
+
 }

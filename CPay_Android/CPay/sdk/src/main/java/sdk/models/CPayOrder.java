@@ -9,13 +9,17 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import sdk.CPayLaunchType;
 import sdk.networking.CPayEnv;
 
 /**
  * Created by alexandrudiaconu on 7/22/17.
  */
 
+@SuppressWarnings("unused")
 public class CPayOrder {
+    public CPayLaunchType mLaunchType = CPayLaunchType.OTHERS;
+
     public String mReferenceId;
     private String mAmount;
     private String mCurrency;
@@ -39,6 +43,10 @@ public class CPayOrder {
 
     public String getVendor() {
         return mVendor;
+    }
+
+    public CPayLaunchType getLaunchType() {
+        return mLaunchType;
     }
 
     public String getCurrency() {
@@ -70,6 +78,7 @@ public class CPayOrder {
     }
 
     static public class Builder {
+        private CPayLaunchType launchType;
         private String referenceId;
         private String amount;
         private String currency;
@@ -182,8 +191,14 @@ public class CPayOrder {
             return this;
         }
 
+        public Builder setLaunchType(CPayLaunchType type) {
+            launchType = type;
+            return this;
+        }
+
         public CPayOrder build() {
             CPayOrder order = new CPayOrder();
+            order.mLaunchType = this.launchType;
             order.mReferenceId = this.referenceId;
             order.mAmount = this.amount;
             order.mCurrency = this.currency;

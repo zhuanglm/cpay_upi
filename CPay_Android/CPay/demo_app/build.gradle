@@ -4,14 +4,15 @@ apply plugin: 'com.android.application'
 //CNY - com.cpay.cpaydemo
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion rootProject.compileSdkVersion
     defaultConfig {
 //        applicationId "com.citconpay.mdemo"
         applicationId "citcon.cpay"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 2
-        versionName "1.1.0"
+
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
 
         multiDexEnabled true
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'

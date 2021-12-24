@@ -1,11 +1,14 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 30
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
 
         multiDexEnabled true
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -108,7 +111,7 @@ makeJar.dependsOn(clearJar, build)
 
 ext {
     PUBLISH_GROUP_ID = 'com.citcon.sdk'
-    PUBLISH_VERSION = '2.2.0'
+    PUBLISH_VERSION = rootProject.versionName
     PUBLISH_ARTIFACT_ID = 'mobile'
 }
 
