@@ -9,6 +9,17 @@
         <item>dana</item>
         <item>alipay_hk</item>
     </string-array>
+
+    <string-array name="kcp_vendors_list">
+        <item>card</item>
+        <item>payco</item>
+        <item>naverpay</item>
+        <item>banktransfer</item>
+        <item>linepay</item>
+        <item>paypay</item>
+        <item>rakutenpay</item>
+    </string-array>
+
     <string-array name="token_list">
         <item>F75E9D7D40A5451D86701EEDD5C81E54</item>
         <item>52A92BB2E055434DBAC0CC4585C242B2</item>
@@ -23,6 +34,7 @@
 
     <string-array name="mode_list">
         <item>UAT</item>
+        <item>QA</item>
         <item>DEV</item>
         <item>PROD</item>
     </string-array>

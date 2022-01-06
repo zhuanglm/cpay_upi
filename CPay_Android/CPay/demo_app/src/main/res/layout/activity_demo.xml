@@ -235,6 +235,22 @@
                     android:checked="true"
                     android:layout_marginStart="10dp"
                     android:layout_toEndOf="@id/mid" />
+
+                <Spinner
+                    android:id="@+id/kcp_types"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/vendor_spinner"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/rect"
+                    android:entries="@array/kcp_vendors_list">
+
+                </Spinner>
+
             </RelativeLayout>
 
             <TextView
@@ -411,7 +427,6 @@
                 android:layout_toEndOf="@+id/request_button"
                 android:layout_toRightOf="@+id/request_button"
                 android:textColor="@android:color/darker_gray" />
-
 
         </RelativeLayout>
     </ScrollView>

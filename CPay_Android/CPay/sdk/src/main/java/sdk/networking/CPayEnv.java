@@ -41,6 +41,7 @@ public class CPayEnv {
 
     // KCP
     private static final String URL_KCP_DEV = "https://dev.citconpay.com/";
+    private static final String URL_KCP_QA = "https://qa.qa01.citconpay.com/";
     private static final String URL_KCP_UAT = "https://uat.citconpay.com/";
     private static final String URL_KCP_PROD = "https://citconpay.com/";
 
@@ -55,14 +56,24 @@ public class CPayEnv {
 
     private static String getEntryPath(String vendor, CPayEntryType cType) {
         if (cType == CPayEntryType.ORDER) {
-            if (vendor.equals("gcash") || vendor.equals("dana") || vendor.equals("alipay_hk") || vendor.equals("kakaopay")) {
-                return AMS_ORDER_PATH;
-            } else if (vendor.equals("upop")) {
-                return AMS_ORDER_PATH;
-            } else if (vendor.equals("card")) {
-                return KCP_ORDER_PATH;
-            } else {
-                return ORDER_PATH;
+            switch (vendor) {
+                case "gcash":
+                case "dana":
+                case "alipay_hk":
+                case "kakaopay":
+                    return AMS_ORDER_PATH;
+                case "upop":
+                    return AMS_ORDER_PATH;
+                case "card":
+                case "payco":
+                case "naverpay":
+                case "banktransfer":
+                case "linepay" :
+                case "paypay" :
+                case "rakutenpay" :
+                    return KCP_ORDER_PATH;
+                default:
+                    return ORDER_PATH;
             }
         } else {
             return INQUIRE_PATH;
@@ -120,7 +131,15 @@ public class CPayEnv {
 
                 //kcp test
             case "card":
+            case "payco":
+            case "naverpay":
+            case "banktransfer":
+            case "linepay" :
+            case "paypay" :
+            case "rakutenpay" :
                 switch (env) {
+                    case QA:
+                        return URL_KCP_QA;
                     case DEV:
                         return URL_KCP_DEV;
                     case UAT:

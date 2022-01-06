@@ -54,6 +54,7 @@ public class DemoActivity extends AppCompatActivity {
     private EditText mAmountEditText;
     private Spinner mCurrencySpinner;
     private Spinner mVendorSpinner;
+    private Spinner mKCPSpinner;
     private Spinner mModeSpinner;
     private Spinner mTokenSpinner;
     private EditText mIpnEditText;
@@ -111,6 +112,7 @@ public class DemoActivity extends AppCompatActivity {
         mAmountEditText = findViewById(R.id.amount_editText);
         mCurrencySpinner = findViewById(R.id.currency_spinner);
         mVendorSpinner = findViewById(R.id.vendor_spinner);
+        mKCPSpinner = findViewById(R.id.kcp_types);
         mModeSpinner = findViewById(R.id.mode_spinner);
         mTokenSpinner = findViewById(R.id.token_spinner);
         mIpnEditText = findViewById(R.id.ipn_editText);
@@ -138,6 +140,11 @@ public class DemoActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 setPreSet(position);
+                if (position == 0) {
+                    mKCPSpinner.setVisibility(View.VISIBLE);
+                } else {
+                    mKCPSpinner.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -198,7 +205,7 @@ public class DemoActivity extends AppCompatActivity {
                         .setBody(mBodyEditText.getText().toString())
                         .setAmount(mAmountEditText.getText().toString())
                         .setCurrency(mCurrencySpinner.getSelectedItem().toString())
-                        .setVendor("card")
+                        .setVendor(mKCPSpinner.getSelectedItem().toString())
                         .setIpnUrl(mIpnEditText.getText().toString())
                         .setCallbackUrl(mCallbackEditText.getText().toString())
                         .setAllowDuplicate(mSwitch.isChecked())

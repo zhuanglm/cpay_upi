@@ -76,6 +76,9 @@ public class CPaySDK {
             case "DEV":
                 setMode(CPayMode.DEV);
                 break;
+            case "QA":
+                setMode(CPayMode.QA);
+                break;
             case "UAT":
                 setMode(CPayMode.UAT);
                 break;
