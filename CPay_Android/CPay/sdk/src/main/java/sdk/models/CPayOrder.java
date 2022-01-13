@@ -37,9 +37,12 @@ public class CPayOrder {
     private Locale mCountry;
     private String mNote;
     private String mSource;
-    private Boolean mIsAutoCapture;
+    private boolean mIsAutoCapture;
     private Consumer mConsumer;
     private Goods mGoods;
+
+    //add for CN pay acceleration
+    private boolean mIsAccelerateCNPay;
 
     public String getVendor() {
         return mVendor;
@@ -51,6 +54,10 @@ public class CPayOrder {
 
     public String getCurrency() {
         return this.mCurrency;
+    }
+
+    public boolean isAccelerateCNPay() {
+        return mIsAccelerateCNPay;
     }
 
     public CPayOrder() {
@@ -95,9 +102,16 @@ public class CPayOrder {
         private Locale country;
         private String note;
         private String source;
-        private Boolean isAutoCapture;
+        private boolean isAutoCapture;
         private Goods goods;
         private Consumer consumer;
+
+        private boolean isAccelarateCNPay;
+
+        public Builder enableCNPayAcceleration(boolean flag) {
+            this.isAccelarateCNPay = flag;
+            return this;
+        }
 
         public Builder setReferenceId(String referenceId) {
             this.referenceId = referenceId;
@@ -220,6 +234,8 @@ public class CPayOrder {
             order.mGoods = this.goods;
             order.mConsumer = this.consumer;
 
+            order.mIsAccelerateCNPay = this.isAccelarateCNPay;
+
             return order;
         }
     }
@@ -228,14 +244,18 @@ public class CPayOrder {
         Map<String, String> returned = new HashMap<>();
         returned.put("reference", mReferenceId);
 
-        if(!mVendor.equals("card")) {
+        if(mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop")
+                || mVendor.equals("cc") || mVendor.equals("kakaopay") || mVendor.equals("dana")
+                || mVendor.equals("alipay_hk")) {
             returned.put("body", mBody);
             returned.put("subject", mSubject);
             returned.put("allow_duplicates", mAllowDuplicate ? "yes" : "no");
         }
 
         if (mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop")
-                || mVendor.equals("cc") || mVendor.equals("card")) {
+                || mVendor.equals("cc") || mVendor.equals("card") || mVendor.equals("payco")
+                || mVendor.equals("naverpay") || mVendor.equals("banktransfer") || mVendor.equals("linepay")
+                || mVendor.equals("paypay") || mVendor.equals("rakutenpay")) {
             //Please only use amount when the payment method is alipay, wechatpay, cc, or upop.
             //Please only use trans_amount when the payment method is jkopay, alipay_hk, kakaopay, gcash, dana, truemoney, bkash, or easypaisa.
             returned.put("amount", mAmount);
@@ -254,7 +274,9 @@ public class CPayOrder {
         }
 
         // new properties for KCP
-        if(mVendor.equals("card")){
+        if(mVendor.equals("card") || mVendor.equals("payco") || mVendor.equals("naverpay")
+                || mVendor.equals("banktransfer") || mVendor.equals("linepay") || mVendor.equals("paypay")
+                || mVendor.equals("rakutenpay")){
             returned.put("source", mSource);
             returned.put("auto_capture", mIsAutoCapture ? "true" : "false");
             returned.put("country", mCountry.getCountry());

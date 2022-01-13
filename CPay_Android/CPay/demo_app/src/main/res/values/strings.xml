@@ -7,6 +7,7 @@
     <string name="currency">CURRENCY</string>
     <string name="vendor">VENDOR</string>
     <string name="duplicate">DUPLICATE</string>
+    <string name="cn_acceleration">Acceleration</string>
     <string name="ipn">IPN URL</string>
     <string name="callback">CALLBACK URL</string>
     <string name="ext">EXT</string>

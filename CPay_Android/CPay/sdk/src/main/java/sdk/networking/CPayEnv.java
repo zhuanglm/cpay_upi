@@ -15,7 +15,7 @@ public class CPayEnv {
     public static final String CNY = "CNY";
 
     // api type
-    public static final String KCP_ORDER_PATH = "payment/pay";
+    public static final String KCP_ORDER_PATH = "payment/pay_app";
     public static final String ORDER_PATH = "payment/pay_app";
     public static final String AMS_ORDER_PATH = "payment/pay_app";
     public static final String INQUIRE_PATH = "payment/inquire";
@@ -45,8 +45,13 @@ public class CPayEnv {
     private static final String URL_KCP_UAT = "https://uat.citconpay.com/";
     private static final String URL_KCP_PROD = "https://citconpay.com/";
 
-    public static String getEntryPoint(String currency, String vendor, CPayEntryType cType) {
-        String baseURL = getBaseURL(currency, vendor);
+    //CN pay acceleration endpoints
+    private static final String URL_CN_PROD = "https://api.citconpay.cn";
+    private static final String URL_CN_UAT = "https://api-uat.citconpay.cn";
+    private static final String URL_CN_DEV = "https://api-dev.citconpay.cn";
+
+    public static String getEntryPoint(String currency, String vendor, CPayEntryType cType, boolean isCNAcceleration) {
+        String baseURL = isCNAcceleration ? getCNPayURL(currency, vendor) : getBaseURL(currency, vendor);
         if(baseURL == null){
             return null;
         }
@@ -127,6 +132,81 @@ public class CPayEnv {
                         return URL_UNIONPAY_UAT;
                     case PROD:
                         return URL_UNIONPAY_PROD;
+                }
+
+                //kcp test
+            case "card":
+            case "payco":
+            case "naverpay":
+            case "banktransfer":
+            case "linepay" :
+            case "paypay" :
+            case "rakutenpay" :
+                switch (env) {
+                    case QA:
+                        return URL_KCP_QA;
+                    case DEV:
+                        return URL_KCP_DEV;
+                    case UAT:
+                        return URL_KCP_UAT;
+                    case PROD:
+                        return URL_KCP_PROD;
+                }
+        }
+
+        return null;
+    }
+
+    public static String getCNPayURL(String currency, String vendor) {
+        CPayMode env = CPaySDK.getMode();
+        switch (vendor) {
+            case "alipay":
+            case "wechatpay":
+                switch (currency) {
+                    case CNY:
+                        switch (env) {
+                            case DEV:
+                                return URL_RMB_DEV;
+                            case QA:
+                            case UAT:
+                                return URL_RMB_UAT;
+                            case PROD:
+                                return URL_RMB_PROD;
+                        }
+                    case USD:
+                    default:
+                        switch (env) {
+                            case DEV:
+                                return URL_CN_DEV;
+                            case QA:
+                            case UAT:
+                                return URL_CN_UAT;
+                            case PROD:
+                                return URL_CN_PROD;
+                        }
+                }
+            case "gcash":
+            case "dana":
+            case "alipay_hk":
+            case "kakaopay":
+                switch (env) {
+                    case DEV:
+                        return URL_AMS_DEV;
+                    case QA:
+                    case UAT:
+                        return URL_AMS_UAT;
+                    case PROD:
+                        return URL_AMS_PROD;
+                }
+            case "upop":
+                switch (env) {
+                    case DEV:
+                        return URL_CN_DEV;
+                    case QA:
+                    case UAT:
+                        return URL_CN_UAT;
+                    case PROD:
+                        return URL_CN_PROD;
                 }
 
                 //kcp test

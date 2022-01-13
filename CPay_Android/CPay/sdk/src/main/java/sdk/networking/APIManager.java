@@ -61,7 +61,8 @@ public class APIManager {
             return;
         }
 
-        String entryPoint = CPayEnv.getEntryPoint(order.getCurrency(), order.getVendor(), CPayEntryType.ORDER);
+        String entryPoint = CPayEnv.getEntryPoint(order.getCurrency(), order.getVendor(),
+                CPayEntryType.ORDER, order.isAccelerateCNPay());
         if (entryPoint == null) {
             Log.e(TAG, "requestOrder: baseURL error, please check currency and vendor");
             CPaySDK.initInstance().onOrderRequestError();
@@ -188,7 +189,8 @@ public class APIManager {
     }
 
     public void inquireOrder(final CPayOrderResult orderResult) {
-        String entryPoint = CPayEnv.getEntryPoint(orderResult.mCurrency, orderResult.mOrder.getVendor(), CPayEntryType.INQUIRE);
+        String entryPoint = CPayEnv.getEntryPoint(orderResult.mCurrency, orderResult.mOrder.getVendor(),
+                CPayEntryType.INQUIRE, orderResult.mOrder.isAccelerateCNPay());
         if (entryPoint == null) {
             Log.e(TAG, "requestOrder: baseURL error, please check currency and vendor");
             CPaySDK.initInstance().onInquiredOrderError();
@@ -225,8 +227,9 @@ public class APIManager {
         mGlobalRequestQueue.add(request);
     }
 
-    public void inquireOrderByRef(final String referenceId, final String currency, final String vendor) {
-        String entryPoint = CPayEnv.getEntryPoint(currency, vendor, CPayEntryType.INQUIRE);
+    public void inquireOrderByRef(final String referenceId, final String currency, final String vendor,
+                                  boolean isCNAcceleration) {
+        String entryPoint = CPayEnv.getEntryPoint(currency, vendor, CPayEntryType.INQUIRE, isCNAcceleration);
         if (entryPoint == null) {
             Log.e(TAG, "inquireOrderByRef: baseURL error, please check currency and vendor");
             CPaySDK.initInstance().onInquiredOrderError();

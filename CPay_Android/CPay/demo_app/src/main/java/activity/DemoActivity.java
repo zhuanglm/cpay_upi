@@ -40,13 +40,13 @@ public class DemoActivity extends AppCompatActivity {
     //mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
     private final static int[][] PRESET =
             {
-                    {0, 0, 3, 1}, // kcp dev usd
-                    {0, 2, 0, 1}, // upop uat usd
-                    {0, 2, 0, 1}, // wechatpay? uat usd
-                    {0, 2, 0, 1}, // alipay?
-                    {0, 2, 3, 100}, // kakaopay
-                    {0, 2, 5, 30000}, // dana
-                    {0, 2, 2, 100}}; //alipay hk uat hkd
+                    {1, 0, 3, 1}, // kcp dev krw
+                    {0, 3, 0, 1}, // upop uat usd
+                    {0, 3, 0, 1}, // wechatpay? uat usd
+                    {0, 3, 0, 1}, // alipay?
+                    {0, 3, 3, 100}, // kakaopay
+                    {0, 3, 5, 30000}, // dana
+                    {0, 3, 2, 100}}; //alipay hk uat hkd
 
     private EditText mReferenceIdEditText;
     private EditText mSubjectEditText;
@@ -59,7 +59,8 @@ public class DemoActivity extends AppCompatActivity {
     private Spinner mTokenSpinner;
     private EditText mIpnEditText;
     private EditText mCallbackEditText;
-    private SwitchCompat mSwitch;
+    private SwitchCompat mDuplicateSwitch;
+    private SwitchCompat mCNPaySwitch;
     private TextView mResultTextView;
     private ScrollView mScrollView;
 
@@ -117,7 +118,8 @@ public class DemoActivity extends AppCompatActivity {
         mTokenSpinner = findViewById(R.id.token_spinner);
         mIpnEditText = findViewById(R.id.ipn_editText);
         mCallbackEditText = findViewById(R.id.callback_editText);
-        mSwitch = findViewById(R.id.duplicate_switch);
+        mDuplicateSwitch = findViewById(R.id.duplicate_switch);
+        mCNPaySwitch = findViewById(R.id.switch_cnpay);
         mResultTextView = findViewById(R.id.result_textView);
         mScrollView = findViewById(R.id.scrollView);
         mExtKey1 = findViewById(R.id.key1_edittext);
@@ -195,7 +197,8 @@ public class DemoActivity extends AppCompatActivity {
                         .setVendor(mVendorSpinner.getSelectedItem().toString())
                         .setIpnUrl(mIpnEditText.getText().toString())
                         .setCallbackUrl(mCallbackEditText.getText().toString())
-                        .setAllowDuplicate(mSwitch.isChecked())
+                        .setAllowDuplicate(mDuplicateSwitch.isChecked())
+                        .enableCNPayAcceleration(mCNPaySwitch.isChecked())
                         .build();
 
                 CPayOrder kcpOrder = new CPayOrder.Builder()
@@ -208,7 +211,7 @@ public class DemoActivity extends AppCompatActivity {
                         .setVendor(mKCPSpinner.getSelectedItem().toString())
                         .setIpnUrl(mIpnEditText.getText().toString())
                         .setCallbackUrl(mCallbackEditText.getText().toString())
-                        .setAllowDuplicate(mSwitch.isChecked())
+                        .setAllowDuplicate(mDuplicateSwitch.isChecked())
                         .setSource("app_h5")
                         .setAutoCapture(true)
                         .setCountry(Locale.KOREA)
@@ -218,6 +221,7 @@ public class DemoActivity extends AppCompatActivity {
                         .setConsumer("John","Doe","6145675309",
                                 "test.sam@test.com","consumer-reference-000")
                         .setGoods("Battery Power Pack", 0,0,0)
+                        .enableCNPayAcceleration(mCNPaySwitch.isChecked())
                         .build();
 
                 CPaySDK.initInstance().requestOrder(mActivity, mVendorSpinner.getSelectedItem().toString().equals("kcp")?
@@ -230,7 +234,7 @@ public class DemoActivity extends AppCompatActivity {
                             return;
                         }
 
-                        if (!orderResult.mStatus.equals("0")) {
+                        if (!orderResult.mStatus.equals("0") && !orderResult.mStatus.equals("initiated")) {
                             Log.e(TAG, "requestOrder failed, status: " + orderResult.mStatus + " message: " + orderResult.mMessage);
                             Toast.makeText(getApplicationContext(), "Error: Get requestOrder failed, status: " + orderResult.mStatus + " message: " + orderResult.mMessage, Toast.LENGTH_LONG).show();
                             return;

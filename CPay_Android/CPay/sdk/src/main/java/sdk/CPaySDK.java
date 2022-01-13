@@ -130,9 +130,10 @@ public class CPaySDK {
     }
 
     @SuppressWarnings("unused")
-    public void inquireOrderByRef(String referenceId, String currency, String vendor, final InquireResponse<CPayInquireResult> listener) {
+    public void inquireOrderByRef(String referenceId, String currency, String vendor, boolean isCNAcceleration,
+                                  final InquireResponse<CPayInquireResult> listener) {
         mInquireListener = listener;
-        mApiManager.inquireOrderByRef(referenceId, currency, vendor);
+        mApiManager.inquireOrderByRef(referenceId, currency, vendor, isCNAcceleration);
     }
 
     public void inquiredOrder(CPayInquireResult inquireResult) {
