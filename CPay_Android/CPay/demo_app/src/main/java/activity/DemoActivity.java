@@ -40,7 +40,8 @@ public class DemoActivity extends AppCompatActivity {
     //mModeSpinner mTokenSpinner mCurrencySpinner mAmountEditText
     private final static int[][] PRESET =
             {
-                    {1, 0, 3, 1}, // kcp dev krw
+                    {1, 4, 6, 500}, // sbps dev JGY
+                    {1, 0, 3, 500}, // kcp qa krw
                     {0, 3, 0, 1}, // upop uat usd
                     {0, 3, 0, 1}, // wechatpay? uat usd
                     {0, 3, 0, 1}, // alipay?
@@ -55,6 +56,7 @@ public class DemoActivity extends AppCompatActivity {
     private Spinner mCurrencySpinner;
     private Spinner mVendorSpinner;
     private Spinner mKCPSpinner;
+    private Spinner mSBSpinner;
     private Spinner mModeSpinner;
     private Spinner mTokenSpinner;
     private EditText mIpnEditText;
@@ -114,6 +116,7 @@ public class DemoActivity extends AppCompatActivity {
         mCurrencySpinner = findViewById(R.id.currency_spinner);
         mVendorSpinner = findViewById(R.id.vendor_spinner);
         mKCPSpinner = findViewById(R.id.kcp_types);
+        mSBSpinner = findViewById(R.id.sbps_types);
         mModeSpinner = findViewById(R.id.mode_spinner);
         mTokenSpinner = findViewById(R.id.token_spinner);
         mIpnEditText = findViewById(R.id.ipn_editText);
@@ -143,9 +146,14 @@ public class DemoActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 setPreSet(position);
                 if (position == 0) {
+                    mKCPSpinner.setVisibility(View.GONE);
+                    mSBSpinner.setVisibility(View.VISIBLE);
+                } else if (position == 1) {
                     mKCPSpinner.setVisibility(View.VISIBLE);
+                    mSBSpinner.setVisibility(View.GONE);
                 } else {
                     mKCPSpinner.setVisibility(View.GONE);
+                    mSBSpinner.setVisibility(View.GONE);
                 }
             }
 
@@ -188,7 +196,8 @@ public class DemoActivity extends AppCompatActivity {
                         mSwitch.isChecked(),
                         ext);*/
 
-                CPayOrder order = new CPayOrder.Builder()
+                CPayOrder otherOrder = new CPayOrder.Builder()
+                        .setLaunchType(CPayLaunchType.OTHERS)
                         .setReferenceId(mReferenceIdEditText.getText().toString())
                         .setSubject(mSubjectEditText.getText().toString())
                         .setBody(mBodyEditText.getText().toString())
@@ -224,8 +233,39 @@ public class DemoActivity extends AppCompatActivity {
                         .enableCNPayAcceleration(mCNPaySwitch.isChecked())
                         .build();
 
-                CPaySDK.initInstance().requestOrder(mActivity, mVendorSpinner.getSelectedItem().toString().equals("kcp")?
-                        kcpOrder : order, new OrderResponse<CPayOrderResult>() {
+                CPayOrder sbOrder = new CPayOrder.Builder()
+                        .setLaunchType(CPayLaunchType.URL)
+                        .setReferenceId(mReferenceIdEditText.getText().toString())
+                        .setSubject(mSubjectEditText.getText().toString())
+                        .setBody(mBodyEditText.getText().toString())
+                        .setAmount(mAmountEditText.getText().toString())
+                        .setCurrency(mCurrencySpinner.getSelectedItem().toString())
+                        .setVendor(mSBSpinner.getSelectedItem().toString())
+                        .setIpnUrl(mIpnEditText.getText().toString())
+                        .setCallbackUrl(mCallbackEditText.getText().toString())
+                        .setAllowDuplicate(mDuplicateSwitch.isChecked())
+                        .setSource("app_h5")
+                        .setAutoCapture(true)
+                        .setCountry(Locale.JAPAN)
+                        .setNote("note dddd")
+                        .setCallbackFailUrl("https://exampe.com/fail")
+                        .setCallbackCancelUrl("https://exampe.com/cancel")
+                        .setConsumer("John","Doe","6145675309",
+                                "test.sam@test.com","consumer-reference-000")
+                        .setGoods("Battery Power Pack", 0,0,0)
+                        .enableCNPayAcceleration(false)
+                        .build();
+
+                CPayOrder order;
+                if(mVendorSpinner.getSelectedItem().toString().equals("kcp")) {
+                    order = kcpOrder;
+                } else if(mVendorSpinner.getSelectedItem().toString().equals("sbps")) {
+                    order = sbOrder;
+                } else {
+                    order = otherOrder;
+                }
+
+                CPaySDK.initInstance().requestOrder(mActivity, order, new OrderResponse<CPayOrderResult>() {
                     @Override
                     public void gotOrderResult(final CPayOrderResult orderResult) {
                         if (orderResult == null) {
