@@ -46,9 +46,9 @@ public class CPayEnv {
     private static final String URL_KCP_PROD = "https://citconpay.com/";
 
     //CN pay acceleration endpoints
-    private static final String URL_CN_PROD = "https://api.citconpay.cn";
-    private static final String URL_CN_UAT = "https://api-uat.citconpay.cn";
-    private static final String URL_CN_DEV = "https://api-dev.citconpay.cn";
+    private static final String URL_CN_PROD = "https://api.citconpay.cn/";
+    private static final String URL_CN_UAT = "https://api-uat.citconpay.cn/";
+    private static final String URL_CN_DEV = "https://api-dev.citconpay.cn/";
 
     public static String getEntryPoint(String currency, String vendor, CPayEntryType cType, boolean isCNAcceleration) {
         String baseURL = isCNAcceleration ? getCNPayURL(currency, vendor) : getBaseURL(currency, vendor);
