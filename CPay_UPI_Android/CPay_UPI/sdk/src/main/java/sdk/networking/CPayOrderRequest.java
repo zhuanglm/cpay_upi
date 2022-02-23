@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import sdk.CPayLaunchType;
 import sdk.CPaySDK;
 import sdk.models.CPayOrder;
 
@@ -21,14 +20,12 @@ import sdk.models.CPayOrder;
 public class CPayOrderRequest extends Request<JSONObject> {
     private final Response.Listener<JSONObject> mListener;
     private final Map<String, String> mParams;
-    private final CPayLaunchType mOrderType;
 
     public CPayOrderRequest(int method, String url, CPayOrder order,
                             Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         this.mListener = reponseListener;
         this.mParams = order.toPayload();
-        this.mOrderType = order.getLaunchType();
     }
 
     @Override

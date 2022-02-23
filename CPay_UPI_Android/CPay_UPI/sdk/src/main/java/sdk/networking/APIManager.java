@@ -100,7 +100,7 @@ public class APIManager {
                                 e.printStackTrace();
                             }
                         }
-                        Log.i(TAG, "Response : " + response.toString());
+                        Log.i(TAG, "Response : " + response);
                     } else {
                         switch (order.getVendor()) {
                             case "wechatpay": {

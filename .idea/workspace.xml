@@ -4,14 +4,30 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="372b786b-9fe4-49c1-a892-84d10fc225c3" name="Default Changelist" comment="" />
+    <list default="true" id="372b786b-9fe4-49c1-a892-84d10fc225c3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CPay_Android/CPay/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/CPay_Android/CPay/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CPay_Android/CPay/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/CPay_Android/CPay/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CPay_Android/CPay/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/CPay_Android/CPay/.idea/vcs.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="ProjectId" id="1wFNAL3lqdqRDXiBt8XujjWJ5c1" />
   <component name="ProjectViewState">
@@ -23,6 +39,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
     <property name="dart.analysis.tool.window.visible" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
     <property name="show.migrate.to.gradle.popup" value="false" />
   </component>
