@@ -1,0 +1,118 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
+
+        multiDexEnabled true
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "citcon-sdk-${variant.name}.aar"
+        }
+    }
+
+
+}
+
+
+repositories {
+    flatDir {
+        dirs project(':sdk').file('libs')
+    }
+}
+
+
+def jarName = 'citcon-sdk.aar'
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    compileOnly 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.9'
+    compileOnly 'com.citcon.sdk:alipay:15.8.03'
+    compileOnly 'com.citcon.sdk:unionpay:3.3.0'
+}
+
+task javaHome {
+    println"JAVA_HOME:" + System.getProperty("java.home")
+}
+
+
+
+task clearJar(type: Delete) {
+
+
+    delete "${project.buildDir}/libs/" + jarName
+    delete "${project.buildDir}/libs/alipaySdk-20180601.jar"
+    delete "${project.buildDir}/libs/volley.jar"
+
+}
+
+task makeJar(type: Copy) {
+    from("${project.buildDir}/intermediates/aar_main_jar/release/")
+    into("${project.buildDir}/libs/")
+    include('classes.jar')
+    rename('classes.jar', jarName)
+
+    from("${project.buildDir}/intermediates/aar_libs_directory/release/libs/")
+    into("${project.buildDir}/libs/")
+    include('alipaySdk-20180601.jar')
+    include('volley.jar')
+}
+
+task superSimpleJar(type: Jar) {
+    baseName = project.name + '-all'
+    from {
+        configurations.compile.findAll {
+            it.getName() != 'android.jar'
+        }.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+makeJar.dependsOn(clearJar, build)
+
+
+ext {
+    PUBLISH_GROUP_ID = 'com.citcon.sdk'
+    PUBLISH_VERSION = rootProject.versionName
+    PUBLISH_ARTIFACT_ID = 'mobile'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"

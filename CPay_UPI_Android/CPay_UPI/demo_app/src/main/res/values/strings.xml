@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">CPay Demo</string>
+    <string name="reference_id">REFERENCE ID</string>
+    <string name="subject">SUBJECT</string>
+    <string name="body">BODY</string>
+    <string name="amount">AMOUNT</string>
+    <string name="currency">CURRENCY</string>
+    <string name="vendor">VENDOR</string>
+    <string name="duplicate">DUPLICATE</string>
+    <string name="cn_acceleration">Acceleration</string>
+    <string name="ipn">IPN URL</string>
+    <string name="callback">CALLBACK URL</string>
+    <string name="ext">EXT</string>
+    <string name="trans_currency">TRANS CURRENCY</string>
+    <string name="request_order">REQUEST ORDER</string>
+    <string name="inquire_order">INQUIRE ORDER</string>
+    <string name="result">RESULT:</string>
+</resources>

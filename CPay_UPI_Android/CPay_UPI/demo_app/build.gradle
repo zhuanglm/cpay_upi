@@ -1,0 +1,97 @@
+apply plugin: 'com.android.application'
+
+//USD - citcon.cpay
+//CNY - com.cpay.cpaydemo
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    defaultConfig {
+//        applicationId "com.citconpay.mdemo"
+        applicationId "citcon.cpay"
+
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
+
+        multiDexEnabled true
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    File keystore = rootProject.file("/Users/raymond.zhuang/StudioProjects/certificate/android_pos.jks")
+    if ( keystore.isFile() ) {
+        println 'Use local keystore'
+    } else {
+        keystore = new File("release.keystore")
+        println 'Github action keystore'
+    }
+
+
+    signingConfigs {
+        release {
+            storeFile keystore
+            storePassword "MitenoUSA1234"
+            keyAlias "android_pos"
+            keyPassword "MitenoUSA1234"
+        }
+
+    }
+
+//    File keystore = rootProject.file("/Users/citcon-lz/Citcon.work/keystore.about/citcon_apicloud.keystore")
+//
+//    signingConfigs {
+//        release {
+//            storeFile keystore
+//            storePassword "citcon"
+//            keyAlias "citcon_apicloud"
+//            keyPassword "citcon"
+//        }
+//
+//    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // for debug apk
+    implementation project(':sdk')
+    //implementation 'com.citcon.sdk:mobile:2.5.1'
+
+    // for release aar
+//    implementation(name: 'citcon-sdk-release', ext: 'aar')
+
+    // wechatpay
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.7.9'
+    // alipay
+    implementation 'com.citcon.sdk:alipay:15.8.03'
+    // unionpay
+    implementation 'com.citcon.sdk:unionpay:3.3.0'
+
+
+
+
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    testImplementation 'junit:junit:4.13.2'
+    implementation "androidx.multidex:multidex:2.0.1"
+}

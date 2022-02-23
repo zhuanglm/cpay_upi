@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="vendors_list">
+        <item>sbps</item>
+        <item>kcp</item>
+        <item>upop</item>
+        <item>wechatpay</item>
+        <item>alipay</item>
+        <item>kakaopay</item>
+        <item>dana</item>
+        <item>alipay_hk</item>
+    </string-array>
+
+    <string-array name="kcp_vendors_list">
+        <item>card</item>
+        <item>payco</item>
+        <item>naverpay</item>
+        <item>banktransfer</item>
+    </string-array>
+
+    <string-array name="sbps_vendors_list">
+        <item>card</item>
+        <item>alipay</item>
+        <item>upop</item>
+        <item>linepay</item>
+        <item>paypay</item>
+        <item>rakutenpay</item>
+    </string-array>
+
+    <string-array name="token_list">
+        <item>292DDDF4D30545EE81499C12C2A9F205</item>
+        <item>F75E9D7D40A5451D86701EEDD5C81E54</item>
+        <item>52A92BB2E055434DBAC0CC4585C242B2</item>
+        <item>XYIL2W9BCQSTNN1CXUQ6WEH9JQYZ3VLM</item>
+        <item>677406467A398E8B20634C1F3DE68EE2</item>
+        <item>FD941BD40AF00714484054302F243A09</item>
+        <item>0FE94760B1A641079E4A5B5866D0E2B3</item>
+        <item>9FBBA96E77D747659901CCBF787CDCF1</item>
+        <item>CNYAPPF6A0FE479A891BF45706A690AE</item>
+        <item>28C35A088F8BDD3F357D1A27DF065BA4</item>
+        <item>27EF9EF6C306D28D59F9B260875B8122</item>
+        <item>70348EDBB0384BDB9619890FA91642DD</item>
+        <item>E00B2E87D3BF4E79ADBFB2619BE856BC</item>
+    </string-array>
+
+    <string-array name="mode_list">
+        <item>UAT</item>
+        <item>QA</item>
+        <item>DEV</item>
+        <item>PROD</item>
+    </string-array>
+
+    <string-array name="currency_list">
+        <item>USD</item>
+        <item>CAD</item>
+        <item>HKD</item>
+        <item>KRW</item>
+        <item>CNY</item>
+        <item>IDR</item>
+        <item>JPY</item>
+    </string-array>
+
+</resources>
