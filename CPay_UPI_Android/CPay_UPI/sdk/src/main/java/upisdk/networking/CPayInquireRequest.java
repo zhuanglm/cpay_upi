@@ -1,4 +1,4 @@
-package sdk.networking;
+package upisdk.networking;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -7,7 +7,7 @@ import com.android.volley.Response;
 import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
-import sdk.CPaySDK;
+import upisdk.CPayUPISDK;
 
 /**
  * Created by alexandrudiaconu on 7/22/17.
@@ -46,7 +46,7 @@ public class CPayInquireRequest extends Request<JSONObject>
     public Map<String, String> getHeaders() throws AuthFailureError
     {
         Map<String, String> headers = new HashMap<>();
-        String auth = "Bearer " + CPaySDK.initInstance().mToken;
+        String auth = "Bearer " + CPayUPISDK.getInstance().mToken;
         headers.put("Authorization", auth);
         return headers;
     }

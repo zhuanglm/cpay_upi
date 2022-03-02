@@ -259,7 +259,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/tv_cnpay"
                     android:layout_marginLeft="10dp"
-                    android:checked="true"
+                    android:checked="false"
                     android:layout_marginStart="10dp"
                     android:layout_toRightOf="@id/duplicate_textView"
                     android:layout_toEndOf="@id/duplicate_textView" />

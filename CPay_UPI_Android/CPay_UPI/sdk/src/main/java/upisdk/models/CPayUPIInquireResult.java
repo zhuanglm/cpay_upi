@@ -1,4 +1,4 @@
-package sdk.models;
+package upisdk.models;
 
 import java.io.Serializable;
 
@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by alexandrudiaconu on 7/24/17.
  */
 
-public class CPayInquireResult implements Serializable
+public class CPayUPIInquireResult implements Serializable
 {
     public String mId;
     public String mType;

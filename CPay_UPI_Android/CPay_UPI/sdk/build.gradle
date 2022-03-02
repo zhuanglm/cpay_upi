@@ -1,8 +1,10 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'kotlin-android'
+    id 'com.android.library'
+}
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion "30.0.3"
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
@@ -36,11 +38,9 @@ android {
 
     libraryVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "citcon-sdk-${variant.name}.aar"
+            outputFileName = "citcon-upi-sdk-${variant.name}.aar"
         }
     }
-
-
 }
 
 
@@ -50,15 +50,16 @@ repositories {
     }
 }
 
-
-def jarName = 'citcon-sdk.aar'
+def jarName = 'citcon-upi-sdk.aar'
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+    implementation 'com.android.volley:volley:1.2.1'
+    implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     testImplementation 'junit:junit:4.13.2'
@@ -71,8 +72,6 @@ dependencies {
 task javaHome {
     println"JAVA_HOME:" + System.getProperty("java.home")
 }
-
-
 
 task clearJar(type: Delete) {
 
@@ -110,7 +109,7 @@ makeJar.dependsOn(clearJar, build)
 
 
 ext {
-    PUBLISH_GROUP_ID = 'com.citcon.sdk'
+    PUBLISH_GROUP_ID = 'com.citcon.upi.sdk'
     PUBLISH_VERSION = rootProject.versionName
     PUBLISH_ARTIFACT_ID = 'mobile'
 }

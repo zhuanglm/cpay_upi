@@ -1,4 +1,4 @@
-package sdk.models;
+package upisdk.models;
 
 public class WXPayorder {
     public String appid;

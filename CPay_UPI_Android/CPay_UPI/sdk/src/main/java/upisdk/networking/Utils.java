@@ -1,4 +1,4 @@
-package sdk.networking;
+package upisdk.networking;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;

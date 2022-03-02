@@ -1,4 +1,4 @@
-package sdk;
+package upisdk;
 
 public enum CPayLaunchType {
     URL,

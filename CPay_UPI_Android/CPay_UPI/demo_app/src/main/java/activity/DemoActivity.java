@@ -2,10 +2,6 @@ package activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,18 +17,17 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Observer;
 
 import java.util.HashMap;
 import java.util.Locale;
 
 import citcon.cpay.BuildConfig;
 import citcon.cpay.R;
-import sdk.CPayLaunchType;
-import sdk.CPaySDK;
-import sdk.interfaces.OrderResponse;
-import sdk.models.CPayInquireResult;
-import sdk.models.CPayOrder;
-import sdk.models.CPayOrderResult;
+import upisdk.CPayLaunchType;
+import upisdk.CPayUPISDK;
+import upisdk.models.CPayUPIInquireResult;
+import upisdk.models.CPayUPIOrder;
 
 public class DemoActivity extends AppCompatActivity {
     private final static String TAG = "DemoActivity";
@@ -73,9 +68,6 @@ public class DemoActivity extends AppCompatActivity {
 
     private Activity mActivity;
 
-    // After Pay success query transaction result
-    private BroadcastReceiver mInquireReceiver;
-
     //    boolean testUSD = true;
 //    private static final String AMS_TOKEN = "XYIL2W9BCQSTNN1CXUQ6WEH9JQYZ3VLM";
 //    private static final String UNIONPAY_TOKEN = "52A92BB2E055434DBAC0CC4585C242B2";
@@ -87,7 +79,7 @@ public class DemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
         mActivity = this;
-        CPaySDK.initInstance(DemoActivity.this, null);
+        CPayUPISDK.initInstance(DemoActivity.this, null);
 
         //String CURRENCY = "USD";
 
@@ -140,6 +132,44 @@ public class DemoActivity extends AppCompatActivity {
         mIpnEditText.setText(IPN_URL); //citcon payment callback url
         mCallbackEditText.setText(CALLBACK_URL); // custom callback url to customization processing
 
+        Observer<CPayUPIInquireResult> resultObserver = response -> {
+            String emerging = "";
+            emerging += "CHECK RESULT:\n\n";
+            if (response == null) {
+                emerging += "NULL response";
+            } else {
+                if (response.mId != null) {
+                    emerging += "ORDER ID: " + response.mId + "\n";
+                }
+                if (response.mType != null) {
+                    emerging += "TYPE: " + response.mType + "\n";
+                }
+                if (response.mAmount != null) {
+                    emerging += "AMOUNT: " + response.mAmount + "\n";
+                }
+                if (response.mTime != null) {
+                    emerging += "TIME: " + response.mTime + "\n";
+                }
+                if (response.mReference != null) {
+                    emerging += "REFERENCE: " + response.mReference + "\n";
+                }
+                if (response.mStatus != null) {
+                    emerging += "STATUS: " + response.mStatus + "\n";
+                }
+                if (response.mCurrency != null) {
+                    emerging += "CURRENCY: " + response.mCurrency + "\n";
+                }
+                if (response.mNote != null) {
+                    emerging += "NOTE: " + response.mNote + "\n";
+                }
+            }
+
+            mResultTextView.setText(emerging);
+
+            mScrollView.post(() -> mScrollView.fullScroll(ScrollView.FOCUS_DOWN));
+        };
+        CPayUPISDK.mInquireResult.observe(this, resultObserver);
+
         mVendorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
@@ -164,178 +194,124 @@ public class DemoActivity extends AppCompatActivity {
         });
 
         Button requestButton = findViewById(R.id.request_button);
-        requestButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        requestButton.setOnClickListener(v -> {
 
-                CPaySDK.setMode(mModeSpinner.getSelectedItem().toString());
-                CPaySDK.setToken(mTokenSpinner.getSelectedItem().toString());
+            CPayUPISDK.setMode(mModeSpinner.getSelectedItem().toString());
+            CPayUPISDK.setToken(/*mTokenSpinner.getSelectedItem().toString()*/
+                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDU1MTY3NzIsImV4cCI6MTY0NzI0ODY4ODc4NH0.uPUexB7ki7tKWwoAxGxaGDtdnKneS66Luo0nX2gHM9A");
 
-                String key1 = mExtKey1.getText().toString().trim();
-                String key2 = mExtKey2.getText().toString().trim();
-                String value1 = mExtValue1.getText().toString().trim();
-                String value2 = mExtValue2.getText().toString().trim();
+            String key1 = mExtKey1.getText().toString().trim();
+            String key2 = mExtKey2.getText().toString().trim();
+            String value1 = mExtValue1.getText().toString().trim();
+            String value2 = mExtValue2.getText().toString().trim();
 
-                HashMap<String, String> ext = new HashMap<>();
-                if (!TextUtils.isEmpty(key1) && !TextUtils.isEmpty(value1)) {
-                    ext.put(key1, value1);
-                }
-
-                if (!TextUtils.isEmpty(key2) && !TextUtils.isEmpty(value2)) {
-                    ext.put(key2, value2);
-                }
-
-                /*CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
-                        mSubjectEditText.getText().toString(),
-                        mBodyEditText.getText().toString(),
-                        mAmountEditText.getText().toString(),
-                        mCurrencySpinner.getSelectedItem().toString(),
-                        mVendorSpinner.getSelectedItem().toString(),
-                        mIpnEditText.getText().toString(),
-                        mCallbackEditText.getText().toString(),
-                        mSwitch.isChecked(),
-                        ext);*/
-
-                CPayOrder otherOrder = new CPayOrder.Builder()
-                        .setLaunchType(CPayLaunchType.OTHERS)
-                        .setReferenceId(mReferenceIdEditText.getText().toString())
-                        .setSubject(mSubjectEditText.getText().toString())
-                        .setBody(mBodyEditText.getText().toString())
-                        .setAmount(mAmountEditText.getText().toString())
-                        .setCurrency(mCurrencySpinner.getSelectedItem().toString())
-                        .setVendor(mVendorSpinner.getSelectedItem().toString())
-                        .setIpnUrl(mIpnEditText.getText().toString())
-                        .setCallbackUrl(mCallbackEditText.getText().toString())
-                        .setAllowDuplicate(mDuplicateSwitch.isChecked())
-                        .enableCNPayAcceleration(mCNPaySwitch.isChecked())
-                        .build();
-
-                CPayOrder kcpOrder = new CPayOrder.Builder()
-                        .setLaunchType(CPayLaunchType.URL)
-                        .setReferenceId(mReferenceIdEditText.getText().toString())
-                        .setSubject(mSubjectEditText.getText().toString())
-                        .setBody(mBodyEditText.getText().toString())
-                        .setAmount(mAmountEditText.getText().toString())
-                        .setCurrency(mCurrencySpinner.getSelectedItem().toString())
-                        .setVendor(mKCPSpinner.getSelectedItem().toString())
-                        .setIpnUrl(mIpnEditText.getText().toString())
-                        .setCallbackUrl(mCallbackEditText.getText().toString())
-                        .setAllowDuplicate(mDuplicateSwitch.isChecked())
-                        .setSource("app_h5")
-                        .setAutoCapture(true)
-                        .setCountry(Locale.KOREA)
-                        .setNote("note dddd")
-                        .setCallbackFailUrl("https://exampe.com/fail")
-                        .setCallbackCancelUrl("https://exampe.com/cancel")
-                        .setConsumer("John","Doe","6145675309",
-                                "test.sam@test.com","consumer-reference-000")
-                        .setGoods("Battery Power Pack", 0,0,0)
-                        .enableCNPayAcceleration(mCNPaySwitch.isChecked())
-                        .build();
-
-                CPayOrder sbOrder = new CPayOrder.Builder()
-                        .setLaunchType(CPayLaunchType.URL)
-                        .setReferenceId(mReferenceIdEditText.getText().toString())
-                        .setSubject(mSubjectEditText.getText().toString())
-                        .setBody(mBodyEditText.getText().toString())
-                        .setAmount(mAmountEditText.getText().toString())
-                        .setCurrency(mCurrencySpinner.getSelectedItem().toString())
-                        .setVendor(mSBSpinner.getSelectedItem().toString())
-                        .setIpnUrl(mIpnEditText.getText().toString())
-                        .setCallbackUrl(mCallbackEditText.getText().toString())
-                        .setAllowDuplicate(mDuplicateSwitch.isChecked())
-                        .setSource("app_h5")
-                        .setAutoCapture(true)
-                        .setCountry(Locale.JAPAN)
-                        .setNote("note dddd")
-                        .setCallbackFailUrl("https://exampe.com/fail")
-                        .setCallbackCancelUrl("https://exampe.com/cancel")
-                        .setConsumer("John","Doe","6145675309",
-                                "test.sam@test.com","consumer-reference-000")
-                        .setGoods("Battery Power Pack", 0,0,0)
-                        .enableCNPayAcceleration(false)
-                        .build();
-
-                CPayOrder order;
-                if(mVendorSpinner.getSelectedItem().toString().equals("kcp")) {
-                    order = kcpOrder;
-                } else if(mVendorSpinner.getSelectedItem().toString().equals("sbps")) {
-                    order = sbOrder;
-                } else {
-                    order = otherOrder;
-                }
-
-                CPaySDK.initInstance().requestOrder(mActivity, order, new OrderResponse<CPayOrderResult>() {
-                    @Override
-                    public void gotOrderResult(final CPayOrderResult orderResult) {
-                        if (orderResult == null) {
-                            Log.e(TAG, "requestOrder failed: orderResult null");
-                            Toast.makeText(getApplicationContext(), "Error: Get requestOrder null failed", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                        if (!orderResult.mStatus.equals("0") && !orderResult.mStatus.equals("initiated")) {
-                            Log.e(TAG, "requestOrder failed, status: " + orderResult.mStatus + " message: " + orderResult.mMessage);
-                            Toast.makeText(getApplicationContext(), "Error: Get requestOrder failed, status: " + orderResult.mStatus + " message: " + orderResult.mMessage, Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                        Log.d(TAG, "requestOrder success");
-                    }
-                });
+            HashMap<String, String> ext = new HashMap<>();
+            if (!TextUtils.isEmpty(key1) && !TextUtils.isEmpty(value1)) {
+                ext.put(key1, value1);
             }
+
+            if (!TextUtils.isEmpty(key2) && !TextUtils.isEmpty(value2)) {
+                ext.put(key2, value2);
+            }
+
+            /*CPayOrder order = new CPayOrder(mReferenceIdEditText.getText().toString(),
+                    mSubjectEditText.getText().toString(),
+                    mBodyEditText.getText().toString(),
+                    mAmountEditText.getText().toString(),
+                    mCurrencySpinner.getSelectedItem().toString(),
+                    mVendorSpinner.getSelectedItem().toString(),
+                    mIpnEditText.getText().toString(),
+                    mCallbackEditText.getText().toString(),
+                    mSwitch.isChecked(),
+                    ext);*/
+
+            CPayUPIOrder otherOrder = new CPayUPIOrder.Builder()
+                    .setLaunchType(CPayLaunchType.OTHERS)
+                    .setReferenceId(mReferenceIdEditText.getText().toString())
+                    .setSubject(mSubjectEditText.getText().toString())
+                    .setBody(mBodyEditText.getText().toString())
+                    .setAmount(mAmountEditText.getText().toString())
+                    .setCurrency(mCurrencySpinner.getSelectedItem().toString())
+                    .setVendor(mVendorSpinner.getSelectedItem().toString())
+                    .setIpnUrl(mIpnEditText.getText().toString())
+                    .setCallbackUrl(mCallbackEditText.getText().toString())
+                    .setMobileCallback("https://exampe.com/mobile")
+                    .setCallbackFailUrl("https://exampe.com/fail")
+                    .setCallbackCancelUrl("https://exampe.com/cancel")
+                    .setAllowDuplicate(mDuplicateSwitch.isChecked())
+                    .enableCNPayAcceleration(mCNPaySwitch.isChecked())
+                    .setCountry(Locale.CANADA)
+                    .setExt(ext)
+                    .build();
+
+            CPayUPIOrder kcpOrder = new CPayUPIOrder.Builder()
+                    .setLaunchType(CPayLaunchType.URL)
+                    .setReferenceId(mReferenceIdEditText.getText().toString())
+                    .setSubject(mSubjectEditText.getText().toString())
+                    .setBody(mBodyEditText.getText().toString())
+                    .setAmount(mAmountEditText.getText().toString())
+                    .setCurrency(mCurrencySpinner.getSelectedItem().toString())
+                    .setVendor(mKCPSpinner.getSelectedItem().toString())
+                    .setIpnUrl(mIpnEditText.getText().toString())
+                    .setCallbackUrl(mCallbackEditText.getText().toString())
+                    .setAllowDuplicate(mDuplicateSwitch.isChecked())
+                    .setSource("app_h5")
+                    .setAutoCapture(true)
+                    .setCountry(Locale.KOREA)
+                    .setNote("note dddd")
+                    .setMobileCallback("https://exampe.com/mobile")
+                    .setCallbackFailUrl("https://exampe.com/fail")
+                    .setCallbackCancelUrl("https://exampe.com/cancel")
+                    .enableCNPayAcceleration(mCNPaySwitch.isChecked())
+                    .build();
+
+            CPayUPIOrder sbOrder = new CPayUPIOrder.Builder()
+                    .setLaunchType(CPayLaunchType.URL)
+                    .setReferenceId(mReferenceIdEditText.getText().toString())
+                    .setSubject(mSubjectEditText.getText().toString())
+                    .setBody(mBodyEditText.getText().toString())
+                    .setAmount(mAmountEditText.getText().toString())
+                    .setCurrency(mCurrencySpinner.getSelectedItem().toString())
+                    .setVendor(mSBSpinner.getSelectedItem().toString())
+                    .setIpnUrl(mIpnEditText.getText().toString())
+                    .setCallbackUrl(mCallbackEditText.getText().toString())
+                    .setAllowDuplicate(mDuplicateSwitch.isChecked())
+                    .setSource("app_h5")
+                    .setAutoCapture(true)
+                    .setCountry(Locale.JAPAN)
+                    .setNote("note dddd")
+                    .setMobileCallback("https://exampe.com/mobile")
+                    .setCallbackFailUrl("https://exampe.com/fail")
+                    .setCallbackCancelUrl("https://exampe.com/cancel")
+                    .enableCNPayAcceleration(false)
+                    .build();
+
+            CPayUPIOrder order;
+            if(mVendorSpinner.getSelectedItem().toString().equals("kcp")) {
+                order = kcpOrder;
+            } else if(mVendorSpinner.getSelectedItem().toString().equals("sbps")) {
+                order = sbOrder;
+            } else {
+                order = otherOrder;
+            }
+
+            CPayUPISDK.getInstance().requestOrder(mActivity, order, orderResult -> {
+                if (orderResult == null) {
+                    Log.e(TAG, "requestOrder failed: orderResult null");
+                    Toast.makeText(getApplicationContext(), "Error: Get requestOrder null failed", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                if (!orderResult.mStatus.equals("0") && !orderResult.mStatus.equals("initiated")) {
+                    Log.e(TAG, "requestOrder failed, status: " + orderResult.mStatus + " message: " + orderResult.mMessage);
+                    Toast.makeText(getApplicationContext(), "Error: Get requestOrder failed, status: " + orderResult.mStatus + " message: " + orderResult.mMessage, Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                Log.d(TAG, "requestOrder success");
+            });
         });
 
-        /**
-         *
-         * <p>Get payment success broadcasting CPayInquireResult
-         *
-         */
-        mInquireReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                CPayInquireResult response = (CPayInquireResult) intent.getSerializableExtra("inquire_result");
-                String emerging = "";
-                emerging += "CHECK RESULT:\n\n";
-                if (response == null) {
-                    emerging += "NULL response";
-                } else {
-                    if (response.mId != null) {
-                        emerging += "ORDER ID: " + response.mId + "\n";
-                    }
-                    if (response.mType != null) {
-                        emerging += "TYPE: " + response.mType + "\n";
-                    }
-                    if (response.mAmount != null) {
-                        emerging += "AMOUNT: " + response.mAmount + "\n";
-                    }
-                    if (response.mTime != null) {
-                        emerging += "TIME: " + response.mTime + "\n";
-                    }
-                    if (response.mReference != null) {
-                        emerging += "REFERENCE: " + response.mReference + "\n";
-                    }
-                    if (response.mStatus != null) {
-                        emerging += "STATUS: " + response.mStatus + "\n";
-                    }
-                    if (response.mCurrency != null) {
-                        emerging += "CURRENCY: " + response.mCurrency + "\n";
-                    }
-                    if (response.mNote != null) {
-                        emerging += "NOTE: " + response.mNote + "\n";
-                    }
-                }
-
-                mResultTextView.setText(emerging);
-
-                mScrollView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
-                    }
-                });
-            }
-        };
     }
 
     private void setPreSet(int i) {
@@ -357,15 +333,13 @@ public class DemoActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        CPaySDK.initInstance().onResume();
+        CPayUPISDK.getInstance().onResume();
 //        if (testUSD) {
 //            CPaySDK.setMode(CPayMode.DEV);
 //        } else {
 //            CPaySDK.setMode(CPayMode.PROD);
 //        }
 
-
-        registerInquireReceiver();
     }
 
     /**
@@ -376,26 +350,6 @@ public class DemoActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
 
-        unregisterInquireReceiver();
-    }
-
-    /**
-     * Register BroadcastReceiver.
-     */
-    private void registerInquireReceiver() {
-        if (mInquireReceiver != null) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction("CPAY_INQUIRE_ORDER");
-            CPaySDK.initInstance().registerReceiver(mInquireReceiver, filter);
-        }
-    }
-
-    /**
-     * <p>unregister BroadcastReceiver.
-     */
-    private void unregisterInquireReceiver() {
-        if (mInquireReceiver != null)
-            CPaySDK.initInstance().unregisterReceiver(mInquireReceiver);
     }
 
 }

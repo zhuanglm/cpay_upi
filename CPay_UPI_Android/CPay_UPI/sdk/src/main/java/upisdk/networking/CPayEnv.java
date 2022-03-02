@@ -1,8 +1,8 @@
-package sdk.networking;
+package upisdk.networking;
 
-import sdk.CPayEntryType;
-import sdk.CPayMode;
-import sdk.CPaySDK;
+import upisdk.CPayEntryType;
+import upisdk.CPayMode;
+import upisdk.CPayUPISDK;
 
 /**
  * Created by citcon.
@@ -20,7 +20,8 @@ public class CPayEnv {
     public static final String AMS_ORDER_PATH = "v1/charges";
     public static final String INQUIRE_PATH = "payment/inquire";
 
-    private static final String URL_DEV = "https://api.dev01.citconpay.com/";
+    private static final String URL_DEV = "http://192.168.9.113:8080/";
+    //private static final String URL_DEV = "https://api.dev01.citconpay.com/";
     private static final String URL_UAT = "https://uat.citconpay.com/";
     private static final String URL_PROD = "https://citconpay.com/";
     private static final String URL_QA = "https://qa.qa01.citconpay.com/";
@@ -72,7 +73,7 @@ public class CPayEnv {
     }
 
     public static String getBaseURL(String currency, String vendor) {
-        CPayMode env = CPaySDK.getMode();
+        CPayMode env = CPayUPISDK.getMode();
         switch (vendor) {
             case "alipay":
             case "wechatpay":
@@ -118,7 +119,7 @@ public class CPayEnv {
     }
 
     public static String getCNPayURL(String currency, String vendor) {
-        CPayMode env = CPaySDK.getMode();
+        CPayMode env = CPayUPISDK.getMode();
         switch (vendor) {
             case "alipay":
             case "wechatpay":

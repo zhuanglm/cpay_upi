@@ -1,4 +1,4 @@
-package sdk;
+package upisdk;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,7 +20,7 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String wxAppId = CPaySDK.getWXAppId();
+        String wxAppId = CPayUPISDK.getWXAppId();
         if(wxAppId != null){
             api = WXAPIFactory.createWXAPI(this, wxAppId);
             api.handleIntent(getIntent(), this);
@@ -48,7 +48,7 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
         switch (resp.errCode){
             case 0:
                 // success
-                CPaySDK.initInstance().onWXPaySuccess(orderID);
+                CPayUPISDK.getInstance().onWXPaySuccess(orderID);
                 finish();
             case -1:
                 errMsg = "sign error";
@@ -60,7 +60,7 @@ public class PaymentActivity extends Activity implements IWXAPIEventHandler {
                 errMsg = "other error";
         }
 
-        CPaySDK.initInstance().onWXPayFailed(orderID, resp.errCode, errMsg);
+        CPayUPISDK.getInstance().onWXPayFailed(orderID, resp.errCode, errMsg);
         finish();
 
     }

@@ -1,23 +1,25 @@
-package sdk.models;
+package upisdk.models;
 
-import android.annotation.SuppressLint;
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
-import sdk.CPayLaunchType;
-import sdk.networking.CPayEnv;
+import upisdk.CPayLaunchType;
+import upisdk.networking.CPayEnv;
 
 /**
  * Created by alexandrudiaconu on 7/22/17.
  */
 
 @SuppressWarnings("unused")
-public class CPayOrder {
+public class CPayUPIOrder {
     public CPayLaunchType mLaunchType = CPayLaunchType.OTHERS;
 
     public String mReferenceId;
@@ -28,6 +30,7 @@ public class CPayOrder {
     private String mBody;
     private String mIpnUrl;
     private String mCallbackUrl;
+    private String mMobileCallback;
     private boolean mAllowDuplicate;
     private HashMap<String, String> mExt;
 
@@ -38,8 +41,6 @@ public class CPayOrder {
     private String mNote;
     private String mSource;
     private boolean mIsAutoCapture;
-    private Consumer mConsumer;
-    private Goods mGoods;
 
     //add for CN pay acceleration
     private boolean mIsAccelerateCNPay;
@@ -60,18 +61,18 @@ public class CPayOrder {
         return mIsAccelerateCNPay;
     }
 
-    public CPayOrder() {
+    public CPayUPIOrder() {
 
     }
 
-    public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
-                     boolean allowDuplicate) {
+    public CPayUPIOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
+                        boolean allowDuplicate) {
 
         this(referenceId, subject, body, amount, currency, vendor, ipnUrl, callbackUrl, allowDuplicate, null);
     }
 
-    public CPayOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
-                     boolean allowDuplicate, HashMap<String, String> ext) {
+    public CPayUPIOrder(String referenceId, String subject, String body, String amount, String currency, String vendor, String ipnUrl, String callbackUrl,
+                        boolean allowDuplicate, HashMap<String, String> ext) {
         mReferenceId = referenceId;
         mAmount = amount;
         mCurrency = TextUtils.isEmpty(currency) /*|| (!currency.equals(CPayEnv.USD) && !currency.equals(CPayEnv.CNY))*/ ? CPayEnv.USD : currency;
@@ -94,6 +95,7 @@ public class CPayOrder {
         private String body;
         private String ipnUrl;
         private String callbackUrl;
+        private String mobileCallback;
         private boolean allowDuplicate;
         private HashMap<String, String> ext;
 
@@ -103,8 +105,6 @@ public class CPayOrder {
         private String note;
         private String source;
         private boolean isAutoCapture;
-        private Goods goods;
-        private Consumer consumer;
 
         private boolean isAccelarateCNPay;
 
@@ -153,6 +153,11 @@ public class CPayOrder {
             return this;
         }
 
+        public Builder setMobileCallback(String callbackUrl) {
+            this.mobileCallback = callbackUrl;
+            return this;
+        }
+
         public Builder setAllowDuplicate(boolean allowDuplicate) {
             this.allowDuplicate = allowDuplicate;
             return this;
@@ -193,25 +198,13 @@ public class CPayOrder {
             return this;
         }
 
-        public Builder setConsumer(String first_name, String last_name, String phone,
-                                   String email, String reference) {
-            consumer = new Consumer(first_name,last_name,phone,email,reference);
-            return this;
-        }
-
-        public Builder setGoods(String name, int taxable_amount, int tax_exempt_amount,
-                                int total_tax_amount) {
-            goods = new Goods(name,taxable_amount,tax_exempt_amount,total_tax_amount);
-            return this;
-        }
-
         public Builder setLaunchType(CPayLaunchType type) {
             launchType = type;
             return this;
         }
 
-        public CPayOrder build() {
-            CPayOrder order = new CPayOrder();
+        public CPayUPIOrder build() {
+            CPayUPIOrder order = new CPayUPIOrder();
             order.mLaunchType = this.launchType;
             order.mReferenceId = this.referenceId;
             order.mAmount = this.amount;
@@ -221,6 +214,7 @@ public class CPayOrder {
             order.mBody = this.body;
             order.mIpnUrl = this.ipnUrl;
             order.mCallbackUrl = this.callbackUrl;
+            order.mMobileCallback = this.mobileCallback;
             order.mAllowDuplicate = this.allowDuplicate;
             order.mExt = this.ext;
 
@@ -231,71 +225,26 @@ public class CPayOrder {
             order.mSource = this.source;
             order.mIsAutoCapture = this.isAutoCapture;
 
-            order.mGoods = this.goods;
-            order.mConsumer = this.consumer;
-
             order.mIsAccelerateCNPay = this.isAccelarateCNPay;
 
             return order;
         }
     }
 
-    public Map<String, String> toPayload() {
-        Map<String, String> returned = new HashMap<>();
-        returned.put("reference", mReferenceId);
+    public JSONObject toPayload() throws JSONException {
+        final JSONObject jsonBody;
+        RequestTransaction transaction = new RequestTransaction(mReferenceId, Integer.parseInt(mAmount), mCurrency,
+                mCountry.getCountry(), mIsAutoCapture);
+        RequestPayment payment = new RequestPayment(mVendor, "non-authenticated",
+                false, "", 60000, new ArrayList<String>(){{add("mobile_native");}});
+        RequestURLs urls = new RequestURLs(mIpnUrl, mMobileCallback, mCallbackUrl, mCancelUrl, mCallbackFailUrl);
 
-        if(mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop")
-                || mVendor.equals("cc") || mVendor.equals("kakaopay") || mVendor.equals("dana")
-                || mVendor.equals("alipay_hk")) {
-            returned.put("body", mBody);
-            returned.put("subject", mSubject);
-            returned.put("allow_duplicates", mAllowDuplicate ? "yes" : "no");
-        }
+        jsonBody = new JSONObject();
+        jsonBody.put("transaction", new JSONObject(new Gson().toJson(transaction)));
+        jsonBody.put("payment", new JSONObject(new Gson().toJson(payment)));
+        jsonBody.put("urls", new JSONObject(new Gson().toJson(urls)));
 
-        if (mVendor.equals("alipay") || mVendor.equals("wechatpay") || mVendor.equals("upop")
-                || mVendor.equals("cc") || mVendor.equals("card") || mVendor.equals("payco")
-                || mVendor.equals("naverpay") || mVendor.equals("banktransfer") || mVendor.equals("linepay")
-                || mVendor.equals("paypay") || mVendor.equals("rakutenpay")) {
-            //Please only use amount when the payment method is alipay, wechatpay, cc, or upop.
-            //Please only use trans_amount when the payment method is jkopay, alipay_hk, kakaopay, gcash, dana, truemoney, bkash, or easypaisa.
-            returned.put("amount", mAmount);
-            returned.put("currency", mCurrency);
-        } else {
-            returned.put("trans_amount", mAmount);
-            returned.put("trans_currency", mCurrency);
-        }
-
-        returned.put("ipn_url", mIpnUrl);
-        returned.put("callback_url", mCallbackUrl);
-        returned.put("vendor", mVendor);
-
-        if(mExt != null && !mExt.isEmpty()){
-            returned.put("ext", new JSONObject(mExt).toString());
-        }
-
-        // new properties for KCP
-        if(mLaunchType == CPayLaunchType.URL){
-            returned.put("source", mSource);
-            returned.put("auto_capture", mIsAutoCapture ? "true" : "false");
-            returned.put("country", mCountry.getCountry());
-            returned.put("note", mNote);
-            returned.put("callback_fail", mCallbackFailUrl);
-            returned.put("cancel_url", mCancelUrl);
-
-            returned.put("consumer[first_name]", mConsumer.getFirstName());
-            returned.put("consumer[last_name]", mConsumer.getLastName());
-            returned.put("consumer[phone]", mConsumer.getPhone());
-            returned.put("consumer[email]", mConsumer.getEmail());
-            returned.put("consumer[reference]", mConsumer.getReference());
-
-            @SuppressLint("DefaultLocale")
-            String goods = String.format("{\"data\":[{\"name\":\"%s\",\"taxable_amount\":%d,\"tax_exempt_amount\":%d,\"total_tax_amount\":%d}]}",
-                    mGoods.getName(),mGoods.getTaxable_amount(),mGoods.getTax_exempt_amount(),mGoods.getTotal_tax_amount());
-            returned.put("goods", goods);
-        }
-
-        return returned;
+        return jsonBody;
     }
-
 
 }

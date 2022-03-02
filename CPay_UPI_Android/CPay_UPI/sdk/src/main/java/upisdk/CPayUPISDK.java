@@ -1,19 +1,16 @@
-package sdk;
+package upisdk;
 
-import static sdk.CPayMode.DEV;
-import static sdk.CPayMode.PROD;
-import static sdk.CPayMode.UAT;
+import static upisdk.CPayMode.DEV;
+import static upisdk.CPayMode.PROD;
+import static upisdk.CPayMode.UAT;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.MutableLiveData;
 
 import com.alipay.sdk.app.PayTask;
 import com.tencent.mm.opensdk.modelpay.PayReq;
@@ -24,35 +21,30 @@ import com.unionpay.UPPayAssistEx;
 import java.util.HashMap;
 import java.util.Map;
 
-import sdk.interfaces.InquireResponse;
-import sdk.interfaces.OrderResponse;
-import sdk.models.CPayInquireResult;
-import sdk.models.CPayOrder;
-import sdk.models.CPayOrderResult;
-import sdk.models.WXPayorder;
-import sdk.networking.APIManager;
+import upisdk.interfaces.InquireResponse;
+import upisdk.interfaces.OrderResponse;
+import upisdk.models.CPayUPIInquireResult;
+import upisdk.models.CPayUPIOrder;
+import upisdk.models.CPayUPIOrderResult;
+import upisdk.models.WXPayorder;
+import upisdk.networking.APIManager;
 
-/**
- * Created by alexandrudiaconu on 7/20/17.
- */
-
-public class CPaySDK {
+public class CPayUPISDK {
     private static final String TAG = "CPaySDK";
-    private static CPaySDK sInstance;
+    private static CPayUPISDK sInstance;
     private final APIManager mApiManager;
-    private OrderResponse<CPayOrderResult> mOrderListener;
-    private InquireResponse<CPayInquireResult> mInquireListener;
+    private OrderResponse<CPayUPIOrderResult> mOrderListener;
+    private InquireResponse<CPayUPIInquireResult> mInquireListener;
     public String mToken;
-    //private Activity mActivity;
-    private CPayOrderResult mOrderResult;
+    private CPayUPIOrderResult mOrderResult;
     public String mWXAppId;
     private CPayMode env = PROD;
     private boolean allowQuery = false;
-    private final LocalBroadcastManager localBroadcastManager;
 
-    private CPaySDK(Context context) {
+    public final static MutableLiveData<CPayUPIInquireResult> mInquireResult = new MutableLiveData<>();
+
+    private CPayUPISDK(Context context) {
         mApiManager = APIManager.getInstance(context);
-        localBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
 
@@ -67,7 +59,7 @@ public class CPaySDK {
         return sInstance.mWXAppId;
     }
 
-    public static void setMode(CPayMode env) {
+    private static void setMode(CPayMode env) {
         sInstance.env = env;
     }
 
@@ -96,9 +88,8 @@ public class CPaySDK {
 
     public static synchronized void initInstance(Activity activity, String token) {
         if (sInstance == null)
-            sInstance = new CPaySDK(activity);
+            sInstance = new CPayUPISDK(activity);
 
-        //sInstance.mActivity = activity;
         if(token != null){
             sInstance.mToken = token;
         }
@@ -110,33 +101,32 @@ public class CPaySDK {
         }
     }
 
-
-    public static synchronized CPaySDK initInstance() {
+    public static synchronized CPayUPISDK getInstance() {
         if (sInstance == null) {
-            throw new IllegalStateException(CPaySDK.class.getSimpleName() +
+            throw new IllegalStateException(CPayUPISDK.class.getSimpleName() +
                     " is not initialized, call getInstance(...) first in the main Activity class");
         }
         return sInstance;
     }
 
-    public void requestOrder(Activity activity, CPayOrder order, final OrderResponse<CPayOrderResult> listener) {
+    public void requestOrder(Activity activity, CPayUPIOrder order, final OrderResponse<CPayUPIOrderResult> listener) {
         mOrderListener = listener;
         mApiManager.requestOrder(activity,order);
     }
 
-    public void inquireOrder(CPayOrderResult orderResult, final InquireResponse<CPayInquireResult> listener) {
+    public void inquireOrder(CPayUPIOrderResult orderResult, final InquireResponse<CPayUPIInquireResult> listener) {
         mInquireListener = listener;
         mApiManager.inquireOrder(orderResult);
     }
 
     @SuppressWarnings("unused")
     public void inquireOrderByRef(String referenceId, String currency, String vendor, boolean isCNAcceleration,
-                                  final InquireResponse<CPayInquireResult> listener) {
+                                  final InquireResponse<CPayUPIInquireResult> listener) {
         mInquireListener = listener;
         mApiManager.inquireOrderByRef(referenceId, currency, vendor, isCNAcceleration);
     }
 
-    public void inquiredOrder(CPayInquireResult inquireResult) {
+    public void inquiredOrder(CPayUPIInquireResult inquireResult) {
         mInquireListener.gotInquireResult(inquireResult);
     }
 
@@ -201,7 +191,7 @@ public class CPaySDK {
 
     private void inquireOrderInternally() {
 
-        CPaySDK.initInstance().inquireOrder(mOrderResult, response -> {
+        inquireOrder(mOrderResult, response -> {
             if (response != null) {
                 String emerging = "";
                 emerging += "CHECK RESULT:\n\n";
@@ -233,27 +223,11 @@ public class CPaySDK {
                 Log.e("CPay", "inquiredOrder: " + emerging);
             }
 
-            Intent intent = new Intent();
-            intent.setAction("CPAY_INQUIRE_ORDER");
-            intent.putExtra("inquire_result", response);
-            localBroadcastManager.sendBroadcast(intent);
-            // mActivity.sendBroadcast(intent);
+            mInquireResult.setValue(response);
         });
     }
 
-    public void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-        if (receiver != null && filter != null) {
-            localBroadcastManager.registerReceiver(receiver, filter);
-        }
-    }
-
-    public void unregisterReceiver(BroadcastReceiver receiver) {
-        if (receiver != null) {
-            localBroadcastManager.unregisterReceiver(receiver);
-        }
-    }
-
-    public void gotAlipay(Activity activity, CPayOrderResult orderResult) {
+    public void gotAlipay(Activity activity, CPayUPIOrderResult orderResult) {
         mOrderResult = orderResult;
 
         final String orderInfo;
@@ -283,14 +257,14 @@ public class CPaySDK {
         payThread.start();
     }
 
-    public void gotUnionPay(Activity activity, CPayOrderResult result) {
+    public void gotUnionPay(Activity activity, CPayUPIOrderResult result) {
         String tn = result.mSignedString;
         UPPayAssistEx.startPay(activity, null, null, tn,  (env == DEV || env == UAT) ? "01": "00");
     }
 
-    public void gotWX(Activity activity, WXPayorder result, CPayOrder order) {
+    public void gotWX(Activity activity, WXPayorder result, CPayUPIOrder order) {
 
-        mOrderResult = new CPayOrderResult();
+        mOrderResult = new CPayUPIOrderResult();
         mOrderResult.mCurrency = order.getCurrency();
         mOrderResult.mOrder = order;
         mOrderResult.mOrderId = result.extData;
@@ -361,8 +335,8 @@ public class CPaySDK {
 
 
 
-    public void setupOnResumeCheck(CPayOrderResult result) {
-        // alipay_hk or unionpay 成功唤起了客户端， 准备在OnResume的地方检查支付结果
+    public void setupOnResumeCheck(CPayUPIOrderResult result) {
+        // alipay_hk or UnionPay 成功唤起了客户端， 准备在OnResume的地方检查支付结果
         allowQuery = true;
         mOrderResult = result;
     }
