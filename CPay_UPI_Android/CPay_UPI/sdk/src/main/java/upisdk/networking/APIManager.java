@@ -79,9 +79,9 @@ public class APIManager {
         }
         Log.e(TAG, entryPoint);
 
-        CPayOrderRequest request;
+        CPayUPIOrderRequest request;
         try {
-            request = new CPayOrderRequest(Request.Method.POST, entryPoint, order,
+            request = new CPayUPIOrderRequest(Request.Method.POST, entryPoint, order,
                     response -> {
                         CitconApiResponse<RespondCharge> apiResponse;
                         Gson gson = new GsonBuilder().create();
@@ -96,7 +96,8 @@ public class APIManager {
                             return;
                         }
 
-                        RespondChargePayment respondPament = apiResponse.getData().getPayment();
+                        RespondCharge respondCharge = apiResponse.getData();
+                        RespondChargePayment respondPament = respondCharge.getPayment();
 
                         if (order.getLaunchType() == CPayLaunchType.URL) {
                             //common starting URL mode
@@ -119,12 +120,12 @@ public class APIManager {
                                         WXPayorder result = new WXPayorder();
                                         result.appid = resContent.optString("appid");
                                         result.partnerid = resContent.optString("mch_id");
-                                        //result.mPackage = res.optString("package");
+                                        result.mPackage = resContent.optString("package");
                                         result.noncestr = resContent.optString("nonce_str");
                                         result.timestamp = resContent.optString("timestamp");
                                         result.prepayid = resContent.optString("prepay_id");
                                         result.sign = resContent.optString("sign");
-                                        //result.extData = res.optString("order_id");
+                                        result.extData = respondCharge.getId();
                                         CPayUPISDK.getInstance().gotWX(activity, result, order);
                                         break;
                                     }
@@ -169,7 +170,7 @@ public class APIManager {
                                     }
                                     case "upop": {
                                         CPayUPIOrderResult result = new CPayUPIOrderResult();
-                                        //result.mOrderId = res.optString("order_id");
+                                        result.mOrderId = respondCharge.getId();
                                         result.mSignedString = resContent.optString("tn");
                                         result.mCurrency = order.getCurrency();
                                         result.mOrder = order;
@@ -187,6 +188,7 @@ public class APIManager {
                     },
                     error -> {
                         error.printStackTrace();
+                        Log.e(TAG, "Request error: " + error.getMessage());
                         CPayUPISDK.getInstance().onOrderRequestError();
                     }
             );
@@ -223,7 +225,7 @@ public class APIManager {
         Map<String, String> payload = new HashMap<>();
         payload.put("transaction_id", orderResult.mOrderId);
         payload.put("inquire_method", "real");
-        CPayInquireRequest request = new CPayInquireRequest(Request.Method.POST, entryPoint, payload,
+        CPayUPIInquireRequest request = new CPayUPIInquireRequest(Request.Method.POST, entryPoint, payload,
                 response -> {
                     CPayUPIInquireResult inquireResult = new CPayUPIInquireResult();
                     inquireResult.mId = response.optString("id");
@@ -262,7 +264,7 @@ public class APIManager {
         Map<String, String> payload = new HashMap<>();
         payload.put("reference", referenceId);
         payload.put("inquire_method", "real");
-        CPayInquireRequest request = new CPayInquireRequest(Request.Method.POST, entryPoint, payload,
+        CPayUPIInquireRequest request = new CPayUPIInquireRequest(Request.Method.POST, entryPoint, payload,
                 response -> {
                     CPayUPIInquireResult inquireResult = new CPayUPIInquireResult();
                     inquireResult.mId = response.optString("id");

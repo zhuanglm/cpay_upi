@@ -13,13 +13,13 @@ import upisdk.CPayUPISDK;
  * Created by alexandrudiaconu on 7/22/17.
  */
 
-public class CPayInquireRequest extends Request<JSONObject>
+public class CPayUPIInquireRequest extends Request<JSONObject>
 {
     private Response.Listener<JSONObject> mListener;
     private Map<String, String> mParams;
 
-    public CPayInquireRequest(int method, String url, Map<String, String> params,
-                              Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
+    public CPayUPIInquireRequest(int method, String url, Map<String, String> params,
+                                 Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         this.mListener = reponseListener;
         this.mParams = params;

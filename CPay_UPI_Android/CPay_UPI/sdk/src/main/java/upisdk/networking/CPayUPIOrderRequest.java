@@ -1,5 +1,7 @@
 package upisdk.networking;
 
+import android.util.Base64;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
@@ -15,11 +17,11 @@ import upisdk.CPayUPISDK;
 import upisdk.models.CPayUPIOrder;
 
 
-public class CPayOrderRequest extends JsonObjectRequest {
+public class CPayUPIOrderRequest extends JsonObjectRequest {
     private final Response.Listener<JSONObject> mListener;
 
-    public CPayOrderRequest(int method, String url, CPayUPIOrder order,
-                            Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) throws JSONException {
+    public CPayUPIOrderRequest(int method, String url, CPayUPIOrder order,
+                               Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) throws JSONException {
         super(method, url, order.toPayload(), responseListener,errorListener);
         this.mListener = responseListener;
     }
@@ -43,4 +45,5 @@ public class CPayOrderRequest extends JsonObjectRequest {
 
         return headers;
     }
+
 }

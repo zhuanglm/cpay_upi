@@ -198,7 +198,7 @@ public class DemoActivity extends AppCompatActivity {
 
             CPayUPISDK.setMode(mModeSpinner.getSelectedItem().toString());
             CPayUPISDK.setToken(/*mTokenSpinner.getSelectedItem().toString()*/
-                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDU1MTY3NzIsImV4cCI6MTY0NzI0ODY4ODc4NH0.uPUexB7ki7tKWwoAxGxaGDtdnKneS66Luo0nX2gHM9A");
+                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDYzMzUzMTQsImV4cCI6MTY0ODA2ODA0OTgyN30.6-m-JWtLW9d6YTbYM7u9IW-WxbFL75_Em8guk-Ev40o");
 
             String key1 = mExtKey1.getText().toString().trim();
             String key2 = mExtKey2.getText().toString().trim();
