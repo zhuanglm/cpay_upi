@@ -1,9 +1,6 @@
 package upisdk.models;
 
-/**
- * Created by alexandrudiaconu on 7/22/17.
- */
-
+@SuppressWarnings("unused")
 public class CPayUPIOrderResult
 {
     public String mRedirectUrl;

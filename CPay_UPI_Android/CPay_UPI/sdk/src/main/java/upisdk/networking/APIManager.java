@@ -14,6 +14,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
@@ -30,6 +31,7 @@ import upisdk.models.CPayUPIInquireResult;
 import upisdk.models.CPayUPIOrder;
 import upisdk.models.CPayUPIOrderResult;
 import upisdk.models.CitconApiResponse;
+import upisdk.models.ErrorMessage;
 import upisdk.models.RespondCharge;
 import upisdk.models.RespondChargePayment;
 import upisdk.models.WXPayorder;
@@ -186,10 +188,20 @@ public class APIManager {
                             }
                         }
                     },
-                    error -> {
-                        error.printStackTrace();
-                        Log.e(TAG, "Request error: " + error.getMessage());
-                        CPayUPISDK.getInstance().onOrderRequestError();
+                    volleyError -> {
+                        volleyError.printStackTrace();
+                        CitconApiResponse<ErrorMessage> errorResponse;
+                        Gson gson = new GsonBuilder().create();
+                        Type errorMsgType = new TypeToken<CitconApiResponse<ErrorMessage>>() {
+                        }.getType();
+                        try {
+                            errorResponse = gson.fromJson(new String(volleyError.networkResponse.data), errorMsgType);
+                            CPayUPISDK.getInstance().onOrderRequestError(order, errorResponse.getData());
+                        } catch (JsonSyntaxException exception) {
+                            CPayUPISDK.getInstance().onOrderRequestError(order, "error code: " + volleyError.networkResponse.statusCode);
+                        }
+                        Log.e(TAG, "Request error: " + volleyError.getMessage());
+
                     }
             );
 

@@ -26,6 +26,7 @@ import upisdk.interfaces.OrderResponse;
 import upisdk.models.CPayUPIInquireResult;
 import upisdk.models.CPayUPIOrder;
 import upisdk.models.CPayUPIOrderResult;
+import upisdk.models.ErrorMessage;
 import upisdk.models.WXPayorder;
 import upisdk.networking.APIManager;
 
@@ -354,6 +355,19 @@ public class CPayUPISDK {
 
     public void onOrderRequestError() {
         mOrderListener.gotOrderResult(null);
+    }
+
+    public void onOrderRequestError(CPayUPIOrder order, String err) {
+        ErrorMessage msg = new ErrorMessage("-1",err,null);
+        onOrderRequestError(order, msg);
+    }
+
+    public void onOrderRequestError(CPayUPIOrder order, ErrorMessage errMsg) {
+        CPayUPIOrderResult result = new CPayUPIOrderResult();
+        result.mOrder = order;
+        result.mStatus = errMsg.getCode();
+        result.mMessage = String.format("%s (%s)", errMsg.getMessage(), errMsg.getDebug());
+        mOrderListener.gotOrderResult(result);
     }
 
     public void onInquiredOrderError() {

@@ -37,7 +37,7 @@ public class DemoActivity extends AppCompatActivity {
             {
                     {1, 4, 6, 500}, // sbps dev JGY
                     {1, 0, 3, 500}, // kcp qa krw
-                    {0, 3, 0, 1}, // upop uat usd
+                    {1, 3, 0, 1}, // upop uat usd
                     {0, 3, 0, 1}, // wechatpay? uat usd
                     {0, 3, 0, 1}, // alipay?
                     {0, 3, 3, 100}, // kakaopay
@@ -198,7 +198,7 @@ public class DemoActivity extends AppCompatActivity {
 
             CPayUPISDK.setMode(mModeSpinner.getSelectedItem().toString());
             CPayUPISDK.setToken(/*mTokenSpinner.getSelectedItem().toString()*/
-                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDYzMzUzMTQsImV4cCI6MTY0ODA2ODA0OTgyN30.6-m-JWtLW9d6YTbYM7u9IW-WxbFL75_Em8guk-Ev40o");
+                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDY3MjI4MzYsImV4cCI6MTY0ODQ1NTk1OTUxMn0.Rf-yp6oDwJ0kcGOAWMGZ3mSt6sHIGTuS4KXg3hYYy4g");
 
             String key1 = mExtKey1.getText().toString().trim();
             String key2 = mExtKey2.getText().toString().trim();

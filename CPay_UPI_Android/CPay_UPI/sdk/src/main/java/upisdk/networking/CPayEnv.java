@@ -20,7 +20,6 @@ public class CPayEnv {
     public static final String AMS_ORDER_PATH = "v1/charges";
     public static final String INQUIRE_PATH = "payment/inquire";
 
-    //private static final String URL_DEV = "http://192.168.9.113:8080/";
     private static final String URL_DEV = "https://api.dev01.citconpay.com/";
     private static final String URL_UAT = "https://uat.citconpay.com/";
     private static final String URL_PROD = "https://citconpay.com/";
