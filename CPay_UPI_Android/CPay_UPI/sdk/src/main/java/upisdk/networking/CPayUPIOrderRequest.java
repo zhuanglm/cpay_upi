@@ -1,6 +1,5 @@
 package upisdk.networking;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -35,7 +34,7 @@ public class CPayUPIOrderRequest extends JsonObjectRequest {
     }
 
     @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
+    public Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type","application/json");
         String auth = "Bearer " + CPayUPISDK.getInstance().mToken;

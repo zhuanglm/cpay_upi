@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import upisdk.models.CitconApiResponse;
 import upisdk.models.ErrorMessage;
 import upisdk.models.RespondCharge;
 import upisdk.models.RespondChargePayment;
+import upisdk.models.ResponsdInquire;
 import upisdk.models.WXPayorder;
 
 
@@ -82,11 +84,11 @@ public class APIManager {
         Log.e(TAG, entryPoint);
 
         CPayUPIOrderRequest request;
+        Gson gson = new GsonBuilder().create();
         try {
             request = new CPayUPIOrderRequest(Request.Method.POST, entryPoint, order,
                     response -> {
                         CitconApiResponse<RespondCharge> apiResponse;
-                        Gson gson = new GsonBuilder().create();
                         Type chargeType = new TypeToken<CitconApiResponse<RespondCharge>>() {
                         }.getType();
                         apiResponse = gson.fromJson(response.toString(), chargeType);
@@ -134,9 +136,9 @@ public class APIManager {
                                     case "alipay": {
                                         CPayUPIOrderResult result = new CPayUPIOrderResult();
                                         //result.mRedirectUrl = res.optString("redirect_url");
-                                        result.mOrderId = resContent.optString("order_id");
-                                        result.mSignedString = response.optString("signed_string");
-                                        result.mOrderSpec = response.optString("orderSpec");
+                                        result.mOrderId = respondCharge.getId();
+                                        result.mSignedString = resContent.optString("signedString");
+                                        result.mOrderSpec = resContent.optString("orderSpec");
                                         result.mCurrency = order.getCurrency();
                                         result.mOrder = order;
                                         CPayUPISDK.getInstance().gotAlipay(activity, result);
@@ -191,7 +193,6 @@ public class APIManager {
                     volleyError -> {
                         volleyError.printStackTrace();
                         CitconApiResponse<ErrorMessage> errorResponse;
-                        Gson gson = new GsonBuilder().create();
                         Type errorMsgType = new TypeToken<CitconApiResponse<ErrorMessage>>() {
                         }.getType();
                         try {
@@ -200,7 +201,7 @@ public class APIManager {
                         } catch (JsonSyntaxException exception) {
                             CPayUPISDK.getInstance().onOrderRequestError(order, "error code: " + volleyError.networkResponse.statusCode);
                         }
-                        Log.e(TAG, "Request error: " + volleyError.getMessage());
+                        Log.e(TAG, "Order Request error: " + volleyError.getMessage());
 
                     }
             );
@@ -211,12 +212,12 @@ public class APIManager {
                     DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
 
             ));
-            try {
-                Log.i(TAG, "Request header: " + request.getHeaders());
-                Log.i(TAG, "Request body: " + new String(request.getBody()));
+            /*try {
+                Log.i(TAG, "Order Request header: " + request.getHeaders());
+                Log.i(TAG, "Order Request body: " + new String(request.getBody()));
             } catch (AuthFailureError authFailureError) {
                 authFailureError.printStackTrace();
-            }
+            }*/
             mGlobalRequestQueue.add(request);
 
         } catch (JSONException e) {
@@ -226,33 +227,57 @@ public class APIManager {
     }
 
     public void inquireOrder(final CPayUPIOrderResult orderResult) {
-        String entryPoint = CPayEnv.getEntryPoint(orderResult.mCurrency, orderResult.mOrder.getVendor(),
-                CPayEntryType.INQUIRE, orderResult.mOrder.isAccelerateCNPay());
+        String entryPoint = CPayEnv.getEntryPoint(orderResult.mOrder.getVendor(), orderResult.mOrderId);
         if (entryPoint == null) {
             Log.e(TAG, "requestOrder: baseURL error, please check currency and vendor");
             CPayUPISDK.getInstance().onInquiredOrderError();
             return;
         }
 
-        Map<String, String> payload = new HashMap<>();
-        payload.put("transaction_id", orderResult.mOrderId);
-        payload.put("inquire_method", "real");
-        CPayUPIInquireRequest request = new CPayUPIInquireRequest(Request.Method.POST, entryPoint, payload,
+        Gson gson = new GsonBuilder().create();
+        CPayUPIInquireRequest request = new CPayUPIInquireRequest(Request.Method.GET, entryPoint, null,
                 response -> {
+                    Log.i(TAG, "Inquire Response body: " + response.toString());
+
+                    CitconApiResponse<ResponsdInquire> apiResponse;
+                    Type inquireType = new TypeToken<CitconApiResponse<ResponsdInquire>>() {
+                    }.getType();
+                    apiResponse = gson.fromJson(response.toString(), inquireType);
+
+                    if (!apiResponse.isSuccessful()) {
+                        String errorMessage = response.optString("message");
+                        Log.e(TAG, "Error when inquireOrder reason: " + errorMessage);
+                        CPayUPISDK.getInstance().onOrderRequestError();
+                        return;
+                    }
+
+                    ResponsdInquire resInquire = apiResponse.getData();
+
                     CPayUPIInquireResult inquireResult = new CPayUPIInquireResult();
-                    inquireResult.mId = response.optString("id");
-                    inquireResult.mType = response.optString("type");
-                    inquireResult.mAmount = response.optString("amount");
-                    inquireResult.mTime = response.optString("time");
-                    inquireResult.mReference = response.optString("reference");
-                    inquireResult.mStatus = response.optString("status");
-                    inquireResult.mCurrency = response.optString("currency");
-                    inquireResult.mNote = response.optString("note");
+
+                    inquireResult.mId = resInquire.getId();
+                    inquireResult.mType = resInquire.getPayment().getMethod();
+                    inquireResult.mAmount = String.valueOf(resInquire.getAmount());
+                    inquireResult.mTime = DateFormat.format("MM/dd/yyyy hh:mm:ss a",
+                            new Date(resInquire.getTime_created())).toString();
+                    inquireResult.mReference = resInquire.getReference();
+                    inquireResult.mStatus = resInquire.getStatus();
+                    inquireResult.mCurrency = resInquire.getCurrency();
+
                     CPayUPISDK.getInstance().inquiredOrder(inquireResult);
                 },
-                error -> {
-                    error.printStackTrace();
-                    CPayUPISDK.getInstance().onInquiredOrderError();
+                volleyError -> {
+                    volleyError.printStackTrace();
+                    CitconApiResponse<ErrorMessage> errorResponse;
+                    Type errorMsgType = new TypeToken<CitconApiResponse<ErrorMessage>>() {
+                    }.getType();
+                    try {
+                        errorResponse = gson.fromJson(new String(volleyError.networkResponse.data), errorMsgType);
+                        CPayUPISDK.getInstance().onOrderRequestError(orderResult.mOrder, errorResponse.getData());
+                    } catch (JsonSyntaxException exception) {
+                        CPayUPISDK.getInstance().onOrderRequestError(orderResult.mOrder, "error code: " + volleyError.networkResponse.statusCode);
+                    }
+                    Log.e(TAG, "Inquire Request error: " + volleyError.getMessage());
                 }
         );
         request.setRetryPolicy(new DefaultRetryPolicy(

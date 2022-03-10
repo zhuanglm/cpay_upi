@@ -18,7 +18,7 @@ public class CPayEnv {
     public static final String UPI_ORDER_PATH = "v1/charges";
     public static final String ORDER_PATH = "v1/charges";
     public static final String AMS_ORDER_PATH = "v1/charges";
-    public static final String INQUIRE_PATH = "payment/inquire";
+    public static final String INQUIRE_PATH = "v1/transactions/";
 
     private static final String URL_DEV = "https://api.dev01.citconpay.com/";
     private static final String URL_UAT = "https://uat.citconpay.com/";
@@ -42,6 +42,14 @@ public class CPayEnv {
         }
         return baseURL + getEntryPath(vendor, cType);
 
+    }
+
+    public static String getEntryPoint(String vendor, String transaction) {
+        String baseURL = getBaseURL("USD", vendor);
+        if(baseURL == null){
+            return null;
+        }
+        return baseURL + getEntryPath(vendor, CPayEntryType.INQUIRE) + transaction;
     }
 
     private static String getEntryPath(String vendor, CPayEntryType cType) {

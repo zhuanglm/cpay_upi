@@ -1,22 +1,20 @@
 package upisdk.networking;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
+
 import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
-import upisdk.CPayUPISDK;
 
-/**
- * Created by alexandrudiaconu on 7/22/17.
- */
+import upisdk.CPayUPISDK;
 
 public class CPayUPIInquireRequest extends Request<JSONObject>
 {
-    private Response.Listener<JSONObject> mListener;
-    private Map<String, String> mParams;
+    private final Response.Listener<JSONObject> mListener;
+    private final Map<String, String> mParams;
 
     public CPayUPIInquireRequest(int method, String url, Map<String, String> params,
                                  Response.Listener<JSONObject> reponseListener, Response.ErrorListener errorListener) {
@@ -25,11 +23,9 @@ public class CPayUPIInquireRequest extends Request<JSONObject>
         this.mParams = params;
     }
 
-    protected Map<String, String> getParams()
-            throws AuthFailureError
-    {
+    protected Map<String, String> getParams() {
         return mParams;
-    };
+    }
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
@@ -43,9 +39,9 @@ public class CPayUPIInquireRequest extends Request<JSONObject>
     }
 
     @Override
-    public Map<String, String> getHeaders() throws AuthFailureError
-    {
+    public Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type","application/json");
         String auth = "Bearer " + CPayUPISDK.getInstance().mToken;
         headers.put("Authorization", auth);
         return headers;

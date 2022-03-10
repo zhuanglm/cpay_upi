@@ -1,2 +1,3 @@
 <resources>
+    <string name="wechat_start_err">Incorrect WechatPay API key or WeChat is not installed on the device</string>
 </resources>

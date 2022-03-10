@@ -39,7 +39,7 @@ public class DemoActivity extends AppCompatActivity {
                     {1, 0, 3, 500}, // kcp qa krw
                     {1, 3, 0, 1}, // upop uat usd
                     {0, 3, 0, 1}, // wechatpay? uat usd
-                    {0, 3, 0, 1}, // alipay?
+                    {1, 3, 0, 1}, // alipay?
                     {0, 3, 3, 100}, // kakaopay
                     {0, 3, 5, 30000}, // dana
                     {0, 3, 2, 100}}; //alipay hk uat hkd
@@ -85,7 +85,7 @@ public class DemoActivity extends AppCompatActivity {
 
 //        if (testUSD) {
 
-        String REF_ID = "202108170633";
+        String REF_ID = "OgXNgkqJHD";
 //        AUTH_TOKEN = UNIONPAY_TOKEN;
         String IPN_URL = "https://merchant.com/ipn.php";
         String CALLBACK_URL = "https://dev.citcon-inc.com";
@@ -198,7 +198,7 @@ public class DemoActivity extends AppCompatActivity {
 
             CPayUPISDK.setMode(mModeSpinner.getSelectedItem().toString());
             CPayUPISDK.setToken(/*mTokenSpinner.getSelectedItem().toString()*/
-                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDY3MjI4MzYsImV4cCI6MTY0ODQ1NTk1OTUxMn0.Rf-yp6oDwJ0kcGOAWMGZ3mSt6sHIGTuS4KXg3hYYy4g");
+                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDY5MzY3MTUsImV4cCI6MTY0ODY3MDA1MTcyNn0.TTcsCJZwbUo28nHaXNIkBESYwq3RKvuY3-MnQYA3nq0");
 
             String key1 = mExtKey1.getText().toString().trim();
             String key2 = mExtKey2.getText().toString().trim();

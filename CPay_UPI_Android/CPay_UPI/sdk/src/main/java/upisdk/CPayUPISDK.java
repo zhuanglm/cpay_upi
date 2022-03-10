@@ -21,6 +21,7 @@ import com.unionpay.UPPayAssistEx;
 import java.util.HashMap;
 import java.util.Map;
 
+import citcon.upisdk.R;
 import upisdk.interfaces.InquireResponse;
 import upisdk.interfaces.OrderResponse;
 import upisdk.models.CPayUPIInquireResult;
@@ -31,7 +32,7 @@ import upisdk.models.WXPayorder;
 import upisdk.networking.APIManager;
 
 public class CPayUPISDK {
-    private static final String TAG = "CPaySDK";
+    private static final String TAG = "CPayUPISDK";
     private static CPayUPISDK sInstance;
     private final APIManager mApiManager;
     private OrderResponse<CPayUPIOrderResult> mOrderListener;
@@ -103,10 +104,6 @@ public class CPayUPISDK {
     }
 
     public static synchronized CPayUPISDK getInstance() {
-        if (sInstance == null) {
-            throw new IllegalStateException(CPayUPISDK.class.getSimpleName() +
-                    " is not initialized, call getInstance(...) first in the main Activity class");
-        }
         return sInstance;
     }
 
@@ -281,14 +278,12 @@ public class CPayUPISDK {
         req.sign = result.sign;
         req.extData = result.extData;
 
-        boolean argsCheck = req.checkArgs();
+        //boolean argsCheck = req.checkArgs();
 
         setWXAppId(result.appid);
         IWXAPI api = WXAPIFactory.createWXAPI(activity, result.appid);
 
         boolean callWxRet = api.sendReq(req);
-        Log.d("jim", "check args " + argsCheck);
-        Log.d("jim", "send return :" + callWxRet);
 
         if (callWxRet) {
             // success invoke wechat app
@@ -296,7 +291,7 @@ public class CPayUPISDK {
         } else {
             // failed
             mOrderResult.mStatus = "-2";
-            mOrderResult.mMessage = "WeChat is not installed on the device";
+            mOrderResult.mMessage = activity.getString(R.string.wechat_start_err);
             mOrderListener.gotOrderResult(mOrderResult);
         }
 
