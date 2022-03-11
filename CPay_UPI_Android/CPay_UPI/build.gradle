@@ -5,8 +5,8 @@ buildscript {
         compileSdkVersion = 31
         minSdkVersion = 26
         targetSdkVersion = 31
-        versionCode = 3
-        version = '3.0.2'
+        versionCode = 1
+        version = '1.0.1'
         versionName = version
     }
     repositories {

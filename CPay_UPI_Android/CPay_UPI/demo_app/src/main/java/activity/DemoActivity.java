@@ -87,7 +87,7 @@ public class DemoActivity extends AppCompatActivity {
 
 //        if (testUSD) {
 
-        String REF_ID = "y6VnzRoW58";
+        String REF_ID = "pAkZMjEG8l";
 //        AUTH_TOKEN = UNIONPAY_TOKEN;
         String IPN_URL = "https://merchant.com/ipn.php";
         String CALLBACK_URL = "https://dev.citcon-inc.com";
@@ -201,7 +201,7 @@ public class DemoActivity extends AppCompatActivity {
 
             CPayUPISDK.setMode(mModeSpinner.getSelectedItem().toString());
             CPayUPISDK.setToken(/*mTokenSpinner.getSelectedItem().toString()*/
-                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDY5NjEzMTAsImV4cCI6MTY0ODY5NDY3MjE5Nn0.iHvWIveYF8DEmwoAKBUhAC6FY5QjrMZwLsFfiBG6E5c");
+                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDY5NjIwMTgsImV4cCI6MTY0ODY5NTM4MDgwNH0.eRdPBPKmbo3tW6gLa-SDwCycfhhcYbRtoHXaYK7M7y4");
 
             String key1 = mExtKey1.getText().toString().trim();
             String key2 = mExtKey2.getText().toString().trim();
