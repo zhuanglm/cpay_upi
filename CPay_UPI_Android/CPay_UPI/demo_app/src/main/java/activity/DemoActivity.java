@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,6 +20,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -38,7 +40,7 @@ public class DemoActivity extends AppCompatActivity {
                     {1, 4, 6, 500}, // sbps dev JGY
                     {1, 0, 3, 500}, // kcp qa krw
                     {1, 3, 0, 1}, // upop uat usd
-                    {0, 3, 0, 1}, // wechatpay? uat usd
+                    {1, 3, 0, 1}, // wechatpay? uat usd
                     {1, 3, 0, 1}, // alipay?
                     {0, 3, 3, 100}, // kakaopay
                     {0, 3, 5, 30000}, // dana
@@ -85,7 +87,7 @@ public class DemoActivity extends AppCompatActivity {
 
 //        if (testUSD) {
 
-        String REF_ID = "OgXNgkqJHD";
+        String REF_ID = "y6VnzRoW58";
 //        AUTH_TOKEN = UNIONPAY_TOKEN;
         String IPN_URL = "https://merchant.com/ipn.php";
         String CALLBACK_URL = "https://dev.citcon-inc.com";
@@ -144,11 +146,12 @@ public class DemoActivity extends AppCompatActivity {
                 if (response.mType != null) {
                     emerging += "TYPE: " + response.mType + "\n";
                 }
-                if (response.mAmount != null) {
-                    emerging += "AMOUNT: " + response.mAmount + "\n";
-                }
-                if (response.mTime != null) {
-                    emerging += "TIME: " + response.mTime + "\n";
+
+                emerging += "AMOUNT: " + response.mAmount + "\n";
+
+                if (response.mTime != 0) {
+                    emerging += "TIME: " + DateFormat.format("MM/dd/yyyy hh:mm:ss a",
+                            new Date(response.mTime)).toString() + "\n";
                 }
                 if (response.mReference != null) {
                     emerging += "REFERENCE: " + response.mReference + "\n";
@@ -198,7 +201,7 @@ public class DemoActivity extends AppCompatActivity {
 
             CPayUPISDK.setMode(mModeSpinner.getSelectedItem().toString());
             CPayUPISDK.setToken(/*mTokenSpinner.getSelectedItem().toString()*/
-                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDY5MzY3MTUsImV4cCI6MTY0ODY3MDA1MTcyNn0.TTcsCJZwbUo28nHaXNIkBESYwq3RKvuY3-MnQYA3nq0");
+                    "UPI_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoia2ZjX3VwaV91c2QiLCJpYXQiOjE2NDY5NjEzMTAsImV4cCI6MTY0ODY5NDY3MjE5Nn0.iHvWIveYF8DEmwoAKBUhAC6FY5QjrMZwLsFfiBG6E5c");
 
             String key1 = mExtKey1.getText().toString().trim();
             String key2 = mExtKey2.getText().toString().trim();

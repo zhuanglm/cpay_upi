@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -18,6 +19,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.unionpay.UPPayAssistEx;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -118,11 +120,11 @@ public class CPayUPISDK {
     }
 
     @SuppressWarnings("unused")
-    public void inquireOrderByRef(String referenceId, String currency, String vendor, boolean isCNAcceleration,
+    /*public void inquireOrderByRef(String referenceId, String currency, String vendor, boolean isCNAcceleration,
                                   final InquireResponse<CPayUPIInquireResult> listener) {
         mInquireListener = listener;
         mApiManager.inquireOrderByRef(referenceId, currency, vendor, isCNAcceleration);
-    }
+    }*/
 
     public void inquiredOrder(CPayUPIInquireResult inquireResult) {
         mInquireListener.gotInquireResult(inquireResult);
@@ -199,11 +201,12 @@ public class CPayUPISDK {
                 if (response.mType != null) {
                     emerging += "TYPE: " + response.mType + "\n";
                 }
-                if (response.mAmount != null) {
-                    emerging += "AMOUNT: " + response.mAmount + "\n";
-                }
-                if (response.mTime != null) {
-                    emerging += "TIME: " + response.mTime + "\n";
+
+                emerging += "AMOUNT: " + response.mAmount + "\n";
+
+                if (response.mTime != 0) {
+                    emerging += "TIME: " + DateFormat.format("MM/dd/yyyy hh:mm:ss a",
+                            new Date(response.mTime)).toString() + "\n";
                 }
                 if (response.mReference != null) {
                     emerging += "REFERENCE: " + response.mReference + "\n";

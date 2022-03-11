@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -21,9 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import upisdk.CPayEntryType;
 import upisdk.CPayLaunchType;
@@ -123,11 +119,11 @@ public class APIManager {
                                     case "wechatpay": {
                                         WXPayorder result = new WXPayorder();
                                         result.appid = resContent.optString("appid");
-                                        result.partnerid = resContent.optString("mch_id");
+                                        result.partnerid = resContent.optString("partnerid");
                                         result.mPackage = resContent.optString("package");
-                                        result.noncestr = resContent.optString("nonce_str");
+                                        result.noncestr = resContent.optString("noncestr");
                                         result.timestamp = resContent.optString("timestamp");
-                                        result.prepayid = resContent.optString("prepay_id");
+                                        result.prepayid = resContent.optString("prepayid");
                                         result.sign = resContent.optString("sign");
                                         result.extData = respondCharge.getId();
                                         CPayUPISDK.getInstance().gotWX(activity, result, order);
@@ -257,9 +253,13 @@ public class APIManager {
 
                     inquireResult.mId = resInquire.getId();
                     inquireResult.mType = resInquire.getPayment().getMethod();
-                    inquireResult.mAmount = String.valueOf(resInquire.getAmount());
-                    inquireResult.mTime = DateFormat.format("MM/dd/yyyy hh:mm:ss a",
-                            new Date(resInquire.getTime_created())).toString();
+                    inquireResult.mAmount = resInquire.getAmount();
+                    inquireResult.mCaptureAmount = resInquire.getAmount_captured() != null ? resInquire.getAmount_captured() : 0;
+                    inquireResult.mRefundAmount = resInquire.getAmount_refunded() != null ? resInquire.getAmount_refunded() : 0;
+                    inquireResult.mCountry = resInquire.getCountry();
+                    inquireResult.mTime = resInquire.getTime_created();
+                    inquireResult.mCaptureTime = resInquire.getTime_captured() != null ? resInquire.getTime_captured() : 0;
+                    inquireResult.mCancelTime = resInquire.getTime_canceled();
                     inquireResult.mReference = resInquire.getReference();
                     inquireResult.mStatus = resInquire.getStatus();
                     inquireResult.mCurrency = resInquire.getCurrency();
@@ -289,7 +289,7 @@ public class APIManager {
         mGlobalRequestQueue.add(request);
     }
 
-    public void inquireOrderByRef(final String referenceId, final String currency, final String vendor,
+    /*public void inquireOrderByRef(final String referenceId, final String currency, final String vendor,
                                   boolean isCNAcceleration) {
         String entryPoint = CPayEnv.getEntryPoint(currency, vendor, CPayEntryType.INQUIRE, isCNAcceleration);
         if (entryPoint == null) {
@@ -326,7 +326,7 @@ public class APIManager {
 
         ));
         mGlobalRequestQueue.add(request);
-    }
+    }*/
 
 
 }
